@@ -56,22 +56,24 @@ http_request('GET' => $req->to_url,
             if (my $text = $json->{text}) {
                 $json->{processed} = tweet_processor($text);
 
-                my $json_text = JSON::to_json($json);
-                $client->post("http://localhost:5000/", [
-                    tweet => $json_text,
-                ], sub {
-                    my $len = length($json->{user}{screen_name});
-                    my $screen_name = $json->{user}{screen_name} . ' ' x (15 - $len);
-                    my $space = ' ' x 15;
-                    if (length($text) > 70) {
-                        $text = substr($text, 0, 70) . "\n" . substr($text, 71);
-                    }
-                    $text =~ s/[\n|\r|\r\n]/\n$space| /g;
+                if ($json->{processed}) {
+                    my $json_text = JSON::to_json($json);
+                    $client->post("http://localhost:5000/", [
+                        tweet => $json_text,
+                    ], sub {
+                        my $len = length($json->{user}{screen_name});
+                        my $screen_name = $json->{user}{screen_name} . ' ' x (15 - $len);
+                        my $space = ' ' x 15;
+                        if (length($text) > 70) {
+                            $text = substr($text, 0, 70) . "\n" . substr($text, 71);
+                        }
+                        $text =~ s/[\n|\r|\r\n]/\n$space| /g;
 
-                    my $line = encode_utf8("$screen_name| $text \n");
-                    print $line;
-                    $file->push_write($line);
-                });
+                        my $line = encode_utf8("$screen_name| $text \n");
+                        print $line;
+                        $file->push_write($line);
+                    });
+                }
             }
         };
         $hdl->on_read(sub { $hdl->push_read( json => $r ); });
@@ -87,7 +89,11 @@ sub tweet_processor {
     $text =~ s{\@([0-9a-zA-Z_]+)}{\@<a href="http://twitter.com/$1" target="_blank">$1</a>}g;
     $text =~ s{\s+#([0-9a-zA-Z_]+)}{<a href="http://search.twitter.com/search?q=%23$1" target="_bkank">#$1</a>}g;
 
-    return $text;
+    if ($text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/) {
+        return undef;
+    } else {
+        return $text;
+    }
 }
 
 __END__
