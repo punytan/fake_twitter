@@ -85,9 +85,10 @@ $cv->recv;
 sub tweet_processor {
     my $text = shift;
 
-    $text =~ s{(http://[\S]+)}{<span class="url"><a href="$1">$1</a></span>}g;
-    $text =~ s{\@([0-9a-zA-Z_]+)}{\@<a href="http://twitter.com/$1" target="_blank">$1</a>}g;
-    $text =~ s{\s+#([0-9a-zA-Z_]+)}{<a href="http://search.twitter.com/search?q=%23$1" target="_bkank">#$1</a>}g;
+    $text =~ s{http://twitpic.com/(\w+)}{<div><a href="http://twitpic.com/$1"><img src="http://twitpic.com/show/thumb/$1" /></a></div>};
+    $text =~ s{[^"](http://[\S]+)}{<span class="url"><a href="$1">$1</a></span>}g;
+    $text =~ s{[^"]\@([0-9a-zA-Z_]+)}{\@<a href="http://twitter.com/$1" target="_blank">$1</a>}g;
+    $text =~ s{[^"]\s+#([0-9a-zA-Z_]+)}{<a href="http://search.twitter.com/search?q=%23$1" target="_bkank">#$1</a>}g;
 
     if ($text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/) {
         return undef;
