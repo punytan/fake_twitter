@@ -85,15 +85,33 @@ $cv->recv;
 sub tweet_processor {
     my $text = shift;
 
-    $text =~ s{http://twitpic.com/(\w+)}{<div><a href="http://twitpic.com/$1"><img src="http://twitpic.com/show/thumb/$1" /></a></div>};
-    $text =~ s{[^"](http://[\S]+)}{<span class="url"><a href="$1">$1</a></span>}g;
-    $text =~ s{[^"]\@([0-9a-zA-Z_]+)}{\@<a href="http://twitter.com/$1" target="_blank">$1</a>}g;
-    $text =~ s{[^"]\s+#([0-9a-zA-Z_]+)}{<a href="http://search.twitter.com/search?q=%23$1" target="_bkank">#$1</a>}g;
+    my @re = (
+        qr{http://twitpic\.com/(\w+)}, # twitpic_re
+        qr/@([0-9a-zA-Z_]+)/,          # reply_re
+        qr/#([0-9a-zA-Z_]+)/,          # hash_re
+        qr{(http://[^ ]+)},            # uri_re
+    );
 
-    if ($text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/) {
-        return undef;
+    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]/;
+
+    $text =~ s/$regexp/_process($1, $2, $3, $4)/ge;
+
+    return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/ ? undef : $text;
+}
+
+sub _process {
+    my @args = reverse @_;
+
+    if (defined $args[0]) {
+        return qq{<span class="url"><a href="$args[0]">$args[0]</a></span>};
+    } elsif (defined $args[1]) {
+        return qq{<a href="http://search.twitter.com/search?q=%23$args[1]" target="_bkank">#$args[1]</a>};
+    } elsif (defined $args[2]) {
+        return qq{\@<a href="http://twitter.com/$args[2]" target="_blank">$args[2]</a>};
+    } elsif (defined $args[3]) {
+        return qq{<div><a href="http://twitpic.com/$args[3]"><img src="http://twitpic.com/show/thumb/$args[3]" /></a></div>};
     } else {
-        return $text;
+        # noop
     }
 }
 
