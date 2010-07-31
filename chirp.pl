@@ -41,7 +41,6 @@ my $file; $file = new AnyEvent::Handle
         $cv->send;
     };
 
-$cv->begin;
 http_request('GET' => $req->to_url,
     want_body_handle => 1,
     on_header => sub {
@@ -52,7 +51,9 @@ http_request('GET' => $req->to_url,
         my $hdl = shift;
 
         my $r = sub {
-            my (undef, $json) = @_;
+            my ($handle, $json) = @_;
+            $cv->send unless $handle;
+
             if (my $text = $json->{text}) {
                 $json->{processed} = tweet_processor($text);
 
@@ -86,15 +87,16 @@ sub tweet_processor {
     my $text = shift;
 
     my @re = (
+        qr{http://yfrog\.com/(\w+)},   # yfrog
         qr{http://twitpic\.com/(\w+)}, # twitpic_re
         qr/@([0-9a-zA-Z_]+)/,          # reply_re
         qr/#([0-9a-zA-Z_]+)/,          # hash_re
         qr{(http://[^ ]+)},            # uri_re
     );
 
-    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]/;
+    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]/;
 
-    $text =~ s/$regexp/_process($1, $2, $3, $4)/ge;
+    $text =~ s/$regexp/_process($1, $2, $3, $4, $5)/ge;
 
     return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/ ? undef : $text;
 }
@@ -110,6 +112,8 @@ sub _process {
         return qq{\@<a href="http://twitter.com/$args[2]" target="_blank">$args[2]</a>};
     } elsif (defined $args[3]) {
         return qq{<div><a href="http://twitpic.com/$args[3]"><img src="http://twitpic.com/show/thumb/$args[3]" /></a></div>};
+    } elsif (defined $args[4]) {
+        return qq{<div><a href="http://yfrog.com/$args[4]"><img src="http://yfrog.com/$args[4].th.jpg" /></a></div>};
     } else {
         # noop
     }
