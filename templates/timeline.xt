@@ -4,6 +4,7 @@
 <title>FakeTwitter</title>
 <meta charset="UTF-8" />
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="http://linknode.net/script/jquery.hotkeys-0.7.9.min.js"></script>
 <style>
     * {
         margin: 0px;
@@ -96,6 +97,12 @@ function load_unread_count () {
         if (total_unread == 0) $('ul.tabs').append($('<li>').append("End of Filter").addClass("filter"));
     });
 }
+
+$(document).bind('keydown', 'n', function (evt){
+    var next = $('.tabs > li > a').attr('href');
+    if (next != undefined) document.location.href = next;
+    return false; });
+
 </script>
 </head>
 <body>
