@@ -49,40 +49,46 @@ http_request('GET' => $req->to_url,
     },
     sub {
         my $hdl = shift;
-
-        my $r = sub {
-            my ($handle, $json) = @_;
-            $cv->send unless $handle;
-
-            if (my $text = $json->{text}) {
-                $json->{processed} = tweet_processor($text);
-                $json->{created_at} = scalar localtime;
-
-                if ($json->{processed}) {
-                    my $json_text = JSON::to_json($json);
-                    $client->post("http://localhost:5000/", [
-                        tweet => $json_text,
-                    ], sub {
-                        my $len = length($json->{user}{screen_name});
-                        my $screen_name = $json->{user}{screen_name} . ' ' x (15 - $len);
-                        my $space = ' ' x 15;
-                        if (length($text) > 70) {
-                            $text = substr($text, 0, 70) . "\n" . substr($text, 71);
-                        }
-                        $text =~ s/[\n|\r|\r\n]/\n$space| /g;
-
-                        my $line = encode_utf8("$screen_name| $text \n");
-                        print $line;
-                        $file->push_write($line);
-                    });
-                }
-            }
-        };
-        $hdl->on_read(sub { $hdl->push_read( json => $r ); });
+        $hdl->on_read(sub { $hdl->push_read( json => \&on_tweet ); });
     }
 );
 
 $cv->recv;
+
+exit;
+
+sub on_tweet {
+    my ($handle, $json) = @_;
+    $cv->send unless $handle;
+
+    if (my $text = $json->{text}) {
+        $json->{processed} = tweet_processor($text);
+        $json->{created_at} = scalar localtime;
+
+        if ($json->{processed}) {
+            my $json_text = JSON::to_json($json);
+            $client->post("http://localhost:5000/", [ tweet => $json_text ], sub { write_log($json); });
+        }
+    }
+    $handle->on_read(sub { $handle->push_read( json => \&on_tweet ); });
+}
+
+sub write_log {
+    my $json = shift;
+
+    my $text = $json->{text};
+    my $len = length($json->{user}{screen_name});
+    my $screen_name = $json->{user}{screen_name} . ' ' x (15 - $len);
+    my $space = ' ' x 15;
+    if (length($text) > 70) {
+        $text = substr($text, 0, 70) . "\n" . substr($text, 71);
+    }
+    $text =~ s/[\n|\r|\r\n]/\n$space| /g;
+
+    my $line = encode_utf8("$screen_name| $text \n");
+    print $line;
+    $file->push_write($line);
+}
 
 sub tweet_processor {
     my $text = shift;
