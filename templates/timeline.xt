@@ -123,7 +123,7 @@ function load_unread_count () {
             target="_blank">RT(Unofficial)</a> / 
 
         <a href="http://twitter.com/?status=@<: $item.user.screen_name :> &in_reply_to_status_id=<: $item.id :>&in_reply_to=<: $item.user.screen_name :>"
-            target="_blank">Replay</a> /
+            target="_blank">Reply</a> /
 
         <a href="http://twitter.com/<: $item.user.screen_name :>/status/<: $item.id :>"
             target="_blank"><: $item.created_at :></a>
