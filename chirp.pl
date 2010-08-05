@@ -113,16 +113,23 @@ sub _process {
     my @args = reverse @_;
 
     if (defined $args[0]) {
-        return qq{<span class="url"><a href="$args[0]">$args[0]</a></span>};
-    } elsif (defined $args[1]) {
-        return qq{<a href="http://search.twitter.com/search?q=%23$args[1]" target="_bkank">#$args[1]</a>};
-    } elsif (defined $args[2]) {
+        return qq{<span class="url"><a href="$args[0]" target="_blank">$args[0]</a></span>};
+    }
+    elsif (defined $args[1]) {
+        return qq{<a href="http://search.twitter.com/search?q=%23$args[1]" target="_blank">#$args[1]</a>};
+    }
+    elsif (defined $args[2]) {
         return qq{\@<a href="http://twitter.com/$args[2]" target="_blank">$args[2]</a>};
-    } elsif (defined $args[3]) {
-        return qq{<div><a href="http://twitpic.com/$args[3]"><img src="http://twitpic.com/show/thumb/$args[3]" /></a></div>};
-    } elsif (defined $args[4]) {
-        return qq{<div><a href="http://yfrog.com/$args[4]"><img src="http://yfrog.com/$args[4].th.jpg" /></a></div>};
-    } elsif (defined $args[5]) {
+    }
+    elsif (defined $args[3]) {
+        return qq{<div><a href="http://twitpic.com/$args[3]" target="_blanmk">
+            <img src="http://twitpic.com/show/thumb/$args[3]" /></a></div>};
+    }
+    elsif (defined $args[4]) {
+        return qq{<div><a href="http://yfrog.com/$args[4]" target="_blank">
+            <img src="http://yfrog.com/$args[4].th.jpg" /></a></div>};
+    }
+    elsif (defined $args[5]) {
         return qq{<div><a href="http://movapic.com/pic/$args[5]" target="_blank">
             <img src="http://image.movapic.com/pic/m_$args[5].jpeg" style="width:400px; height:300px;" /></a></div>};
     } else {
