@@ -56,6 +56,7 @@ http_request('GET' => $req->to_url,
 
             if (my $text = $json->{text}) {
                 $json->{processed} = tweet_processor($text);
+                $json->{created_at} = scalar localtime;
 
                 if ($json->{processed}) {
                     my $json_text = JSON::to_json($json);
