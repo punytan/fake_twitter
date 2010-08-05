@@ -94,6 +94,7 @@ sub tweet_processor {
     my $text = shift;
 
     my @re = (
+        qr{http://movapic.com/pic/(\w+)}, # movapic
         qr{http://yfrog\.com/(\w+)},   # yfrog
         qr{http://twitpic\.com/(\w+)}, # twitpic_re
         qr/@([0-9a-zA-Z_]+)/,          # reply_re
@@ -101,9 +102,9 @@ sub tweet_processor {
         qr{(http://[^ ]+)},            # uri_re
     );
 
-    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]/;
+    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]/;
 
-    $text =~ s/$regexp/_process($1, $2, $3, $4, $5)/ge;
+    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6)/ge;
 
     return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/ ? undef : $text;
 }
@@ -121,6 +122,9 @@ sub _process {
         return qq{<div><a href="http://twitpic.com/$args[3]"><img src="http://twitpic.com/show/thumb/$args[3]" /></a></div>};
     } elsif (defined $args[4]) {
         return qq{<div><a href="http://yfrog.com/$args[4]"><img src="http://yfrog.com/$args[4].th.jpg" /></a></div>};
+    } elsif (defined $args[5]) {
+        return qq{<div><a href="http://movapic.com/pic/$args[5]" target="_blank">
+            <img src="http://image.movapic.com/pic/m_$args[5].jpeg" style="width:400px; height:300px;" /></a></div>};
     } else {
         # noop
     }
