@@ -8,6 +8,11 @@
     * {
         margin: 0px;
         padding: 0px;}
+    body {
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 5%;
+        width: 800px;}
     a {
         color: #2276BB;
         text-decoration: none;}
@@ -19,33 +24,29 @@
         font-size: 13px;
         font-weight: bold;
         padding: 3px;}
-    div.tabs {
-        width: 900px;
-        margin-right: auto;
-        margin-left: auto;
-        border: 1px solid gray;
-        text-align: center;
+    ul.tabs {
+        width: 200px;
+        padding-left: 620px;
         padding-bottom: 5px;
         padding-top: 5px;}
     ul#main {
-        width: 900px;
-        border: 1px solid gray;
+        float: left;
+        width: 600px;
         border-top: 0px;
         border-bottom: 0px;
         margin-right: auto;
         margin-left: auto;}
     li.filter {
-        display : inline-block;
+        list-style-type : none;
         border : 1px solid #ccc;
-        vertical-aling : middle;
-        text-align : center;
+        vertical-align : middle;
+        text-align : left;
         margin : 3px;
-        padding : 3px;}
-    li.unread {
+        padding : 3px;
         background-color : #efefef;}
     li.tweet {
         border-bottom : 1px dotted #ccc;
-        vertical-aling : middle;
+        vertical-align : middle;
         padding : 5px;
         list-style-type : none;}
     div.via, div.count {
@@ -53,15 +54,18 @@
         color : #999;
         text-align : right;}
     span.url {
-        color : #2276BB; text-decoration : none;}
+        color : #2276BB;
+        text-decoration : none;}
     div.icon {
         float : left;
         margin : 5px;
         text-align : center;
         width : 80px;}
     div#foot {
-        width: 900px;
+        border-top: 1px solid #eee;
+        width: 800px;
         text-align: center;
+        padding: 5%;
         margin-right: auto;
         margin-left: auto;
         margin-top: 3%;
@@ -69,44 +73,33 @@
 </style>
 <script>
 $(function() {
-   setInterval(function () {load_unread_count();}, 30000);
-});
+    setInterval(function () {load_unread_count();}, 30000);});
+
 function load_unread_count () {
     $.getJSON('/api/unread/count', function(json) {
         $('.filter').remove();
+        var total_unread = 0;
         for (var tab in json) {
             var name = tab;
             var num = json[tab];
             if (name == 'success') continue;
             if (name == '') continue;
-            $('div.tabs > ul').append(
+            if (num == 0) continue;
+            $('ul.tabs').append(
                 $('<li>').append(
                     $('<a>').append(name).attr({ href : "/timeline?filter=" + name }),
                     $('<b>').append(' (' + num + ') ')
-                ).addClass("filter " + name)
+                ).addClass("filter " + name )
             );
-            if (num > 0) {
-                $('li.' + name).addClass("unread");
-            }
+            total_unread++;
         }
+        if (total_unread == 0) $('ul.tabs').append($('<li>').append("End of Filter").addClass("filter"));
     });
 }
 </script>
 </head>
 <body>
-<div class="tabs" style="border-bottom:0px;margin-top:2%;">
-    <ul>
-    : for $unread_count.kv() -> $pair {
-    :   if ($pair.key == 'success') {
-    :   } elsif ($pair.key == '') {
-    :   } else {
-    <li class="filter <: if ($pair.value > 0) { "unread" } :>">
-        <a href="/timeline?filter=<: $pair.key :>"><: $pair.key :></a><b> (<: $pair.value :>) </b>
-    </li>
-    :   }
-    : }
-    </ul>
-</div>
+<img src="http://a0.twimg.com/a/1280955854/images/twitter_logo_header.png" alt="twitter" style="display:block;" />
 <ul id="main">
 <li class="tweet"></li>
 : if $json.success == 1 {
@@ -115,16 +108,25 @@ function load_unread_count () {
 <li class="tweet" id="<: $item.id :>">
     <div class="icon">
         <img src="<: $item.user.profile_image_url :>" style="height:48px; width:48px;" class="icon" />
-        <div class="count" style="text-align:center;">(<: $item.user.friends_count :> / <: $item.user.followers_count :>)</div>
+        <div class="count" style="text-align:center;">
+            (<: $item.user.friends_count :> / <: $item.user.followers_count :>)
+        </div>
     </div>
+
     <div>
         <a href="http://twitter.com/<: $item.user.screen_name :>" target="_blank"><: $item.user.screen_name :></a>
         <: $item.processed | raw :> 
     </div>
+
     <div class="via" style="clear:both;">
-        <a href="http://twitter.com/?status= RT @<: $item.user.screen_name :>%3A <: $item.text :>" target="_blank">RT(Unofficial)</a> / 
-        <a href="http://twitter.com/?status=@<: $item.user.screen_name :> &in_reply_to_status_id=<: $item.id :>&in_reply_to=<: $item.user.screen_name :>" target="_blank">Replay</a> /
-        <a href="http://twitter.com/<: $item.user.screen_name :>/status/<: $item.id :>" target="_blank"><: $item.created_at :></a>
+        <a href="http://twitter.com/?status= RT @<: $item.user.screen_name :>%3A <: $item.text :>"
+            target="_blank">RT(Unofficial)</a> / 
+
+        <a href="http://twitter.com/?status=@<: $item.user.screen_name :> &in_reply_to_status_id=<: $item.id :>&in_reply_to=<: $item.user.screen_name :>"
+            target="_blank">Replay</a> /
+
+        <a href="http://twitter.com/<: $item.user.screen_name :>/status/<: $item.id :>"
+            target="_blank"><: $item.created_at :></a>
         via 
         <: $item.source | raw :>
     </div>
@@ -146,22 +148,24 @@ function load_unread_count () {
 <li class="tweet"> There is no item to render.</li>
 : }
 </ul>
-<div class="tabs" style="border-top:0px;bottom-margin:5%">
-    <ul>
+
+<ul class="tabs">
     : for $unread_count.kv() -> $pair {
     :   if ($pair.key == 'success') {
     :   } elsif ($pair.key == '') {
+    :   } elsif ($pair.value == 0) {
     :   } else {
-    <li class="filter <: if ($pair.value > 0) { "unread" } :>">
+    <li class="filter">
         <a href="/timeline?filter=<: $pair.key :>"><: $pair.key :></a><b> (<: $pair.value :>) </b>
     </li>
     :   }
     : }
-    </ul>
-</div>
-<div id="foot">
+    <li class="filter">End of Filter</li>
+</ul>
+
+<div id="foot" style="clear:both;">
     <form action="/api/filter/new" method="POST">
-        filter: <input name="filter" type="text" />
+        Filter: <input name="filter" type="text" />
         screen_name: <input name="screen_name" type="text" />
         <input type="submit" value="submit" />
     </form>
@@ -170,14 +174,14 @@ function load_unread_count () {
         <input type="submit" value="つぶやく" />
     </form>
 </div>
+
 <script>
     $('.reply_to').append(function () {
         var id = this.id;
         var dat = this.id.split('-');
         $.getJSON("/api/status", { screen_name : dat[0], id : dat[1] }, function (json) {
             $('li#' + id + ' > div.icon > img').attr({src : json.icon});
-            $('li#' + id + ' > div.text').append(json.text);// + json.screen_name );
-            //console.log(id, dat, json, this);
+            $('li#' + id + ' > div.text').append(json.text);
         });
     });
 </script>
