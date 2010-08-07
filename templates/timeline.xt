@@ -188,7 +188,7 @@ $(document).bind('keydown', 'n', function (evt){
         var dat = this.id.split('-');
         $.getJSON("/api/status", { screen_name : dat[0], id : dat[1] }, function (json) {
             $('li#' + id + ' > div.icon > img').attr({src : json.icon});
-            $('li#' + id + ' > div.text').append(json.text);
+            $('li#' + id + ' > div.text').text(json.text);
         });
     });
 </script>
