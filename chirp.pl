@@ -49,6 +49,7 @@ http_request('GET' => $req->to_url,
     },
     sub {
         my $hdl = shift;
+        exit unless $hdl;
         $hdl->on_read(sub { $hdl->push_read( json => \&on_tweet ); });
     }
 );
@@ -59,7 +60,7 @@ exit;
 
 sub on_tweet {
     my ($handle, $json) = @_;
-    $cv->send unless $handle;
+    exit unless $handle;
 
     if (my $text = $json->{text}) {
         $json->{processed} = tweet_processor($text);
@@ -94,6 +95,7 @@ sub tweet_processor {
     my $text = shift;
 
     my @re = (
+        qr{http://www\.nicovideo\.jp/watch/sm(\w+)}, # nicovideo
         qr{http://movapic.com/pic/(\w+)}, # movapic
         qr{http://yfrog\.com/(\w+)},   # yfrog
         qr{http://twitpic\.com/(\w+)}, # twitpic_re
@@ -102,9 +104,9 @@ sub tweet_processor {
         qr{(http://[^ ]+)},            # uri_re
     );
 
-    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]/;
+    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]/;
 
-    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6)/ge;
+    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7)/ge;
 
     return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/ ? undef : $text;
 }
@@ -132,6 +134,10 @@ sub _process {
     elsif (defined $args[5]) {
         return qq{<div><a href="http://movapic.com/pic/$args[5]" target="_blank">
             <img src="http://image.movapic.com/pic/m_$args[5].jpeg" style="width:400px; height:300px;" /></a></div>};
+    }
+    elsif (defined $args[6]) {
+        return qq{<div><a href="http://www.nicovideo.jp/watch/sm$args[6]" target="_blank">
+            <img src="http://tn-skr2.smilevideo.jp/smile?i=$args[6]" style="width:400px; height:300px;" /></a></div>};
     } else {
         # noop
     }
