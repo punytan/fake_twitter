@@ -5,6 +5,9 @@
 <meta charset="UTF-8" />
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script src="http://linknode.net/script/jquery.hotkeys-0.7.9.min.js"></script>
+<script src="http://bit.ly/javascript-api.js?version=latest&amp;login=punytan&amp;apiKey=R_6bbb41e5e034761e57baa6b3b2303947"></script>
+<script src="http://linknode.net/script/prebitly.js"></script>
+<style src="http://linknode.net/script/prebitly.css"></style>
 <style>
     * {
         margin: 0px;
@@ -102,6 +105,8 @@ $(document).bind('keydown', 'n', function (evt){
     var next = $('.tabs > li > a').attr('href');
     if (next != undefined) document.location.href = next;
     return false; });
+
+$(function() {$("a[href*='http://bit.ly']").prebitly();});
 
 </script>
 </head>
