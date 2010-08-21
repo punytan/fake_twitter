@@ -94,7 +94,8 @@ sub write_log {
 sub tweet_processor {
     my $text = shift;
 
-    my @re = (
+    my @re = ( # add
+        qr{(http://tweetphoto\.com/\d+)}, #tweetphoto
         qr{http://www\.nicovideo\.jp/watch/sm(\w+)}, # nicovideo
         qr{http://movapic.com/pic/(\w+)}, # movapic
         qr{http://yfrog\.com/(\w+)},   # yfrog
@@ -104,9 +105,9 @@ sub tweet_processor {
         qr{(http://[^ ]+)},            # uri_re
     );
 
-    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]/;
+    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]|$re[7]/; # add
 
-    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7)/ge;
+    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7, $8)/ge; # add
 
     return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/ ? undef : $text;
 }
@@ -138,6 +139,10 @@ sub _process {
     elsif (defined $args[6]) {
         return qq{<div><a href="http://www.nicovideo.jp/watch/sm$args[6]" target="_blank">
             <img src="http://tn-skr2.smilevideo.jp/smile?i=$args[6]" style="width:400px; height:300px;" /></a></div>};
+    }
+    elsif (defined $args[7]) {
+        return qq{<div><a href="$args[7]" target="_blank">
+            <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$args[7]" style="" /></a></div>};
     } else {
         # noop
     }
