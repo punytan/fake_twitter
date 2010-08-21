@@ -25,11 +25,11 @@ Preparations
 
 Usage
 
-    1. $ plackup kvs.psgi 
+    1. $ plackup -p 5000 -s Twiggy kvs.psgi > /dev/null 2>&1 &
 
     2. $ perl chirp.pl
 
-    3. $ plackup -p 3000 front.psgi
+    3. $ plackup -p 3000 front.psgi > /dev/null 2>&1 &
 
     4. $ tail -f chirp.log
         This enables you to peep at real time tweet log.
