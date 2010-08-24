@@ -109,7 +109,7 @@ sub tweet_processor {
 
     $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7, $8)/ge; # add
 
-    return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch)/ ? undef : $text;
+    return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch|讀賣|阪神|野球)/ ? undef : $text;
 }
 
 sub _process {
