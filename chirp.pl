@@ -117,34 +117,43 @@ sub _process {
 
     if (defined $args[0]) {
         return qq{<span class="url"><a href="$args[0]" target="_blank">$args[0]</a></span>};
+
     }
     elsif (defined $args[1]) {
         return qq{<a href="http://search.twitter.com/search?q=%23$args[1]" target="_blank">#$args[1]</a>};
+
     }
     elsif (defined $args[2]) {
         return qq{\@<a href="http://twitter.com/$args[2]" target="_blank">$args[2]</a>};
+
     }
     elsif (defined $args[3]) {
-        return qq{<div><a href="http://twitpic.com/$args[3]" target="_blanmk">
-            <img src="http://twitpic.com/show/thumb/$args[3]" /></a></div>};
+        return qq{<a href="http://twitpic.com/$args[3]" target="_blanmk">
+            <img src="http://twitpic.com/show/thumb/$args[3]" class="thumb"/></a>};
+
     }
     elsif (defined $args[4]) {
-        return qq{<div><a href="http://yfrog.com/$args[4]" target="_blank">
-            <img src="http://yfrog.com/$args[4].th.jpg" /></a></div>};
+        return qq{<a href="http://yfrog.com/$args[4]" target="_blank">
+            <img src="http://yfrog.com/$args[4].th.jpg" class="thumb"/></a>};
+
     }
     elsif (defined $args[5]) {
-        return qq{<div><a href="http://movapic.com/pic/$args[5]" target="_blank">
-            <img src="http://image.movapic.com/pic/m_$args[5].jpeg" style="width:400px; height:300px;" /></a></div>};
+        return qq{<a href="http://movapic.com/pic/$args[5]" target="_blank">
+            <img src="http://image.movapic.com/pic/m_$args[5].jpeg" class="thumb" /></a>};
+
     }
     elsif (defined $args[6]) {
-        return qq{<div><a href="http://www.nicovideo.jp/watch/sm$args[6]" target="_blank">
-            <img src="http://tn-skr2.smilevideo.jp/smile?i=$args[6]" style="width:400px; height:300px;" /></a></div>};
+        return qq{<a href="http://www.nicovideo.jp/watch/sm$args[6]" target="_blank">
+            <img src="http://tn-skr2.smilevideo.jp/smile?i=$args[6]" class="thumb" /></a>};
+
     }
     elsif (defined $args[7]) {
-        return qq{<div><a href="$args[7]" target="_blank">
-            <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$args[7]" style="" /></a></div>};
+        return qq{<a href="$args[7]" target="_blank">
+            <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$args[7]" class="thumb" /></a>};
+
     } else {
         # noop
+
     }
 }
 
