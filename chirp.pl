@@ -95,6 +95,7 @@ sub tweet_processor {
     my $text = shift;
 
     my @re = ( # add
+        qr{\[co(\d+)\]}, # niconico community
         qr{(http://tweetphoto\.com/\d+)}, #tweetphoto
         qr{http://www\.nicovideo\.jp/watch/sm(\w+)}, # nicovideo
         qr{http://movapic.com/pic/(\w+)}, # movapic
@@ -105,9 +106,9 @@ sub tweet_processor {
         qr{(http://[^ ]+)},            # uri_re
     );
 
-    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]|$re[7]/; # add
+    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]|$re[7]|$re[8]/; # add
 
-    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7, $8)/ge; # add
+    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7, $8, $9)/ge; # add
 
     return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch|讀賣|阪神|野球)/ ? undef : $text;
 }
@@ -118,38 +119,36 @@ sub _process {
     if (defined $args[0]) {
         return qq{<span class="url"><a href="$args[0]" target="_blank">$args[0]</a></span>};
 
-    }
-    elsif (defined $args[1]) {
+    } elsif (defined $args[1]) {
         return qq{<a href="http://search.twitter.com/search?q=%23$args[1]" target="_blank">#$args[1]</a>};
 
-    }
-    elsif (defined $args[2]) {
+    } elsif (defined $args[2]) {
         return qq{\@<a href="http://twitter.com/$args[2]" target="_blank">$args[2]</a>};
 
-    }
-    elsif (defined $args[3]) {
+    } elsif (defined $args[3]) {
         return qq{<a href="http://twitpic.com/$args[3]" target="_blanmk">
             <img src="http://twitpic.com/show/thumb/$args[3]" class="thumb"/></a>};
 
-    }
-    elsif (defined $args[4]) {
+    } elsif (defined $args[4]) {
         return qq{<a href="http://yfrog.com/$args[4]" target="_blank">
             <img src="http://yfrog.com/$args[4].th.jpg" class="thumb"/></a>};
 
-    }
-    elsif (defined $args[5]) {
+    } elsif (defined $args[5]) {
         return qq{<a href="http://movapic.com/pic/$args[5]" target="_blank">
             <img src="http://image.movapic.com/pic/m_$args[5].jpeg" class="thumb" /></a>};
 
-    }
-    elsif (defined $args[6]) {
+    } elsif (defined $args[6]) {
         return qq{<a href="http://www.nicovideo.jp/watch/sm$args[6]" target="_blank">
             <img src="http://tn-skr2.smilevideo.jp/smile?i=$args[6]" class="thumb" /></a>};
 
-    }
-    elsif (defined $args[7]) {
+    } elsif (defined $args[7]) {
         return qq{<a href="$args[7]" target="_blank">
-            <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$args[7]" class="thumb" /></a>};
+            <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$args[7]"
+                class="thumb" /></a>};
+
+    } elsif (defined $args[8]) {
+        return qq{<img src="http://icon.nimg.jp/community/s/co$args[8].jpg"
+            style="width:64px;height:64px;display:block"/>};
 
     } else {
         # noop

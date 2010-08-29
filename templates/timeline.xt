@@ -150,7 +150,7 @@ $(function() {$("a[href*='http://bit.ly']").prebitly();});
 :       if ($item.in_reply_to_status_id) {
 <li class="reply_to tweet" id="<: $item.in_reply_to_screen_name :>-<: $item.in_reply_to_status_id :>" style="padding-left:5%;">
     <div class="icon">
-        <img style="width:48px;height:48px;" />
+        <img style="width:32px;height:32px;" />
     </div>
     <div class="text"></div>
     <div class="via" style="clear:both;"></div>
