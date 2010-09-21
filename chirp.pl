@@ -95,22 +95,23 @@ sub tweet_processor {
     my $text = shift;
 
     my @re = ( # add
-        qr{\[co(\d+)\]}, # niconico community
+        qr{http://gyazo\.com/(\w+)\.png}, # gyazo
+        qr{\[co(\d+)\]},                  # niconico community
         qr{(http://tweetphoto\.com/\d+)}, #tweetphoto
-        qr{http://www\.nicovideo\.jp/watch/sm(\w+)}, # nicovideo
+        qr{http://(?:www\.nicovideo\.jp/watch|nico\.ms)/sm(\w+)}, # nicovideo
         qr{http://movapic.com/pic/(\w+)}, # movapic
-        qr{http://yfrog\.com/(\w+)},   # yfrog
-        qr{http://twitpic\.com/(\w+)}, # twitpic_re
-        qr/@([0-9a-zA-Z_]+)/,          # reply_re
-        qr/#([0-9a-zA-Z_]+)/,          # hash_re
-        qr{(http://[^ ]+)},            # uri_re
+        qr{http://yfrog\.com/(\w+)},      # yfrog
+        qr{http://twitpic\.com/(\w+)},    # twitpic_re
+        qr/@([0-9a-zA-Z_]+)/,             # reply_re
+        qr/#([0-9a-zA-Z_]+)/,             # hash_re
+        qr{(http://[^ ]+)},               # uri_re
     );
 
-    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]|$re[7]|$re[8]/; # add
+    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]|$re[7]|$re[8]|$re[9]/; # add
 
-    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7, $8, $9)/ge; # add
+    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)/ge; # add
 
-    return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch|讀賣|阪神|野球)/ ? undef : $text;
+    return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch|讀賣|阪神|野球|拝金|相互フォロー)/ ? undef : $text;
 }
 
 sub _process {
@@ -149,6 +150,9 @@ sub _process {
     } elsif (defined $args[8]) {
         return qq{<img src="http://icon.nimg.jp/community/s/co$args[8].jpg"
             style="width:64px;height:64px;display:block"/>};
+
+    } elsif (defined $args[9]) {
+        return qq{<img src="http://gyazo.com/$args[9].png" class="thumb" />};
 
     } else {
         # noop
