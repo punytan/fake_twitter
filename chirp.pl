@@ -13,6 +13,7 @@ use Tatsumaki::HTTPClient;
 
 use URI;
 use JSON;
+use HTML::Entities;
 use Perl6::Slurp;
 use Data::Validate::URI ();
 
@@ -92,7 +93,7 @@ sub write_log {
 }
 
 sub tweet_processor {
-    my $text = shift;
+    my $text = encode_entities(decode_entities(shift), q{'<>&"#});
 
     my @re = ( # add
         qr{http://gyazo\.com/(\w+)\.png}, # gyazo
@@ -127,7 +128,7 @@ sub _process {
         return qq{\@<a href="http://twitter.com/$args[2]" target="_blank">$args[2]</a>};
 
     } elsif (defined $args[3]) {
-        return qq{<a href="http://twitpic.com/$args[3]" target="_blanmk">
+        return qq{<a href="http://twitpic.com/$args[3]" target="_blank">
             <img src="http://twitpic.com/show/thumb/$args[3]" class="thumb"/></a>};
 
     } elsif (defined $args[4]) {
