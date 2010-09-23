@@ -135,8 +135,10 @@ $(document).bind('keydown', 'n', function (evt){
 
         <a href="http://twitter.com/<: $item.user.screen_name :>/status/<: $item.id :>"
             target="_blank"><: $item.created_at :></a>
+        <!--
         via 
         <: $item.source | raw :>
+        -->
     </div>
 </li>
 :       if ($item.in_reply_to_status_id) {
