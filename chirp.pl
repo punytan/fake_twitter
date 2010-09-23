@@ -17,6 +17,15 @@ use HTML::Entities;
 use Perl6::Slurp;
 use Data::Validate::URI ();
 
+our %re = (
+    url   => qr{(s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)},
+    reply => qr{(\@[0-9A-Za-z_]+)},
+    hash  => qr{(\#[0-9A-Za-z_]+)},
+    com   => qr{\[(co\d+)\]},
+);
+
+our $regex = qr/$re{url}|$re{reply}|$re{hash}|$re{com}/;
+
 my $json_text = slurp 'oauth.json';
 my $config    = decode_json($json_text);
 
@@ -93,72 +102,80 @@ sub write_log {
 }
 
 sub tweet_processor {
-    my $text = encode_entities(decode_entities(shift), q{'<>&"#});
+    my $text = decode_entities(shift);
 
-    my @re = ( # add
-        qr{http://gyazo\.com/(\w+)\.png}, # gyazo
-        qr{\[co(\d+)\]},                  # niconico community
-        qr{(http://tweetphoto\.com/\d+)}, #tweetphoto
-        qr{http://(?:www\.nicovideo\.jp/watch|nico\.ms)/sm(\w+)}, # nicovideo
-        qr{http://movapic.com/pic/(\w+)}, # movapic
-        qr{http://yfrog\.com/(\w+)},      # yfrog
-        qr{http://twitpic\.com/(\w+)},    # twitpic_re
-        qr/@([0-9a-zA-Z_]+)/,             # reply_re
-        qr/#([0-9a-zA-Z_]+)/,             # hash_re
-        qr{(http://[^ ]+)},               # uri_re
-    );
+    my $html = '';
 
-    my $regexp = qr/$re[0]|$re[1]|$re[2]|$re[3]|$re[4]|$re[5]|$re[6]|$re[7]|$re[8]|$re[9]/; # add
+    for my $token (split $regex, $text) {
+        next unless defined $token;
 
-    $text =~ s/$regexp/_process($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)/ge; # add
+        if ($token =~ /^$re{url}/) {
 
-    return $text =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch|讀賣|阪神|野球|拝金|相互フォロー)/ ? undef : $text;
-}
+            if ($token =~ m!http://twitpic\.com/(\w+)!) {
+                my $encoded = encode_entities($1);
 
-sub _process {
-    my @args = reverse @_;
+                $html .= qq{<a href="http://twitpic.com/$encoded">
+                    <img src="http://twitpic.com/show/thumb/$encoded" class="thumb" /></a>};
 
-    if (defined $args[0]) {
-        return qq{<span class="url"><a href="$args[0]" target="_blank">$args[0]</a></span>};
+            } elsif ($token =~ m!http://yfrog\.com/(\w+)!) {
+                my $encoded = encode_entities($1);
 
-    } elsif (defined $args[1]) {
-        return qq{<a href="http://search.twitter.com/search?q=%23$args[1]" target="_blank">#$args[1]</a>};
+                $html .= qq{<a href="http://yfrog.com/$encoded" target="_blank">
+                    <img src="http://yfrog.com/$encoded.th.jpg" class="thumb"/></a>};
 
-    } elsif (defined $args[2]) {
-        return qq{\@<a href="http://twitter.com/$args[2]" target="_blank">$args[2]</a>};
+            } elsif ($token =~ m!http://movapic\.com/pic/(\w+)!) {
+                my $encoded = encode_entities($1);
 
-    } elsif (defined $args[3]) {
-        return qq{<a href="http://twitpic.com/$args[3]" target="_blank">
-            <img src="http://twitpic.com/show/thumb/$args[3]" class="thumb"/></a>};
+                $html .= qq{<a href="http://movapic.com/pic/$encoded" target="_blank">
+                    <img src="http://image.movapic.com/pic/m_$encoded.jpeg" class="thumb" /></a>};
 
-    } elsif (defined $args[4]) {
-        return qq{<a href="http://yfrog.com/$args[4]" target="_blank">
-            <img src="http://yfrog.com/$args[4].th.jpg" class="thumb"/></a>};
+            } elsif ($token =~ m!http://(?:www\.nicovideo\.jp/watch|nico\.ms)/sm(\w+)!) {
+                my $encoded = encode_entities($1);
 
-    } elsif (defined $args[5]) {
-        return qq{<a href="http://movapic.com/pic/$args[5]" target="_blank">
-            <img src="http://image.movapic.com/pic/m_$args[5].jpeg" class="thumb" /></a>};
+                $html .= qq{<a href="http://www.nicovideo.jp/watch/sm$encoded" target="_blank">
+                    <img src="http://tn-skr2.smilevideo.jp/smile?i=$encoded" class="thumb" /></a>};
 
-    } elsif (defined $args[6]) {
-        return qq{<a href="http://www.nicovideo.jp/watch/sm$args[6]" target="_blank">
-            <img src="http://tn-skr2.smilevideo.jp/smile?i=$args[6]" class="thumb" /></a>};
+            } elsif ($token =~ m!(http://tweetphoto\.com/\d+)!) {
+                my $encoded = encode_entities($1);
 
-    } elsif (defined $args[7]) {
-        return qq{<a href="$args[7]" target="_blank">
-            <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$args[7]"
-                class="thumb" /></a>};
+                $html .= qq{<a href="$encoded" target="_blank">
+                    <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$encoded"
+                        class="thumb" /></a>};
 
-    } elsif (defined $args[8]) {
-        return qq{<img src="http://icon.nimg.jp/community/s/co$args[8].jpg"
-            style="width:64px;height:64px;display:block"/>};
+            } elsif ($token =~ m!http://gyazo\.com/(\w+)\.png!) {
+                my $encoded = encode_entities($1);
+                my $token_encoded = encode_entities($token);
 
-    } elsif (defined $args[9]) {
-        return qq{<img src="http://gyazo.com/$args[9].png" class="thumb" />};
+                $html .= qq{<a href="$token_encoded" target="_blank">
+                    <img src="http://gyazo.com/$encoded.png" class="thumb" /></a>};
 
-    } else {
-        # noop
+            } else {
+                my $encoded = encode_entities($token);
 
+                $html .= qq{<a href="$encoded" target="_blank">$encoded</a>};
+            }
+
+        } elsif ($token =~ m!^\#(.+)$!) {
+            my $hash_ent = encode_entities($1);
+            my $hash_tag = encode_entities($token);
+            $html .= qq{<a href="http://search.twitter.com/search?q=%23$hash_ent" target="_blank">$hash_tag</a>};
+
+        } elsif ($token =~ m!^\@(.+)$!) {
+            my $user = encode_entities($1);
+            $html .= qq{\@<a href="http://twitter.com/$user" target="_blank">$user</a>};
+
+        } elsif ($token =~ m!^co\d+!) {
+            my $co = encode_entities($token);
+            $html .= qq{<a href="http://com.nicovideo.jp/community/$co" target="_blank">
+                <img src="http://icon.nimg.jp/community/s/$co.jpg" style="height:64px;width:64px;" /></a>};
+
+        } else {
+            $html .= encode_entities($token);
+
+        }
     }
+
+    return $html =~ /(?:4sq\.com|shindanmaker\.com|tou\.ch|讀賣|阪神|野球|拝金|相互フォロー)/ ? undef : $html;
 }
 
 __END__
