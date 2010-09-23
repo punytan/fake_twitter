@@ -115,7 +115,7 @@ $(document).bind('keydown', 'n', function (evt){
 :       my $item = $json[$json.filter][$pair.key]
 <li class="tweet" id="<: $item.id :>">
     <div class="icon">
-        <img src="<: $item.user.profile_image_url :>" style="height:32px; width:32px;" class="icon" />
+        <img src="<: $item.user.profile_image_url :>" class="icon" />
         <div class="count" style="text-align:center;">
             (<: $item.user.friends_count :> / <: $item.user.followers_count :>)
         </div>
