@@ -7,7 +7,7 @@ use Data::Dumper;
 use Plack;
 use Plack::Builder;
 use Plack::Session;
-use Plack::Session::Store::File;
+use Plack::Session::Store::TokyoTyrant;
 
 use JSON;
 use Text::Xslate;
@@ -29,7 +29,7 @@ builder {
     enable 'Lint';
 
     enable 'Session',
-        store => Plack::Session::Store::File->new(dir => './session');
+        store => Plack::Session::Store::TokyoTyrant->new(server => ['localhost', 1978]);
 
     mount '/' => \&app;
     mount '/login' => \&login;
