@@ -9,6 +9,7 @@ use Data::Dumper;
 use AnyEvent;
 use AnyEvent::HTTP;
 use AnyEvent::Twitter;
+use AnyEvent::Twitter::Stream;
 use Tatsumaki::HTTPClient;
 
 use URI;
@@ -32,12 +33,6 @@ my $config    = decode_json($json_text);
 my $ua     = AnyEvent::Twitter->new(%$config);
 my $client = Tatsumaki::HTTPClient->new;
 
-my $req = $ua->_make_oauth_request(
-    request_url    => 'http://chirpstream.twitter.com/2b/user.json',
-    request_method => 'GET',
-    extra_params   => {}
-);
-
 my $cv = AE::cv;
 
 open my $outfile, '+>>', 'chirp.log' or die $!;
@@ -51,17 +46,14 @@ my $file; $file = new AnyEvent::Handle
         $cv->send;
     };
 
-http_request('GET' => $req->to_url,
-    want_body_handle => 1,
-    on_header => sub {
-        my $hdr = shift;
-        warn "$hdr->{Status}: $hdr->{Reason}";
-    },
-    sub {
-        my $hdl = shift;
-        exit unless $hdl;
-        $hdl->on_read(sub { $hdl->push_read( json => \&on_tweet ); });
-    }
+my $listener = AnyEvent::Twitter::Stream->new(
+    consumer_key    => $config->{consumer_key},
+    consumer_secret => $config->{consumer_secret},
+    token           => $config->{access_token},
+    token_secret    => $config->{access_token_secret},
+    method          => 'userstream',
+    on_tweet        => \&on_tweet,
+    timeout         => 300,
 );
 
 $cv->recv;
@@ -69,27 +61,25 @@ $cv->recv;
 exit;
 
 sub on_tweet {
-    my ($handle, $json) = @_;
-    exit unless $handle;
+    my $tweet = shift;
 
-    if (my $text = $json->{text}) {
-        $json->{processed} = tweet_processor($text);
-        $json->{created_at} = scalar localtime;
+    if (my $text = $tweet->{text}) {
+        $tweet->{processed} = tweet_processor($text);
+        $tweet->{created_at} = scalar localtime;
 
-        if ($json->{processed}) {
-            my $json_text = JSON::to_json($json);
-            $client->post("http://localhost:5000/", [ tweet => $json_text ], sub { write_log($json); });
+        if ($tweet->{processed}) {
+            my $tweet_text = JSON::to_json($tweet);
+            $client->post("http://localhost:5000/", [ tweet => $tweet_text ], sub { write_log($tweet); });
         }
     }
-    $handle->on_read(sub { $handle->push_read( json => \&on_tweet ); });
 }
 
 sub write_log {
-    my $json = shift;
+    my $tweet = shift;
 
-    my $text = $json->{text};
-    my $len = length($json->{user}{screen_name});
-    my $screen_name = $json->{user}{screen_name} . ' ' x (15 - $len);
+    my $text = $tweet->{text};
+    my $len = length($tweet->{user}{screen_name});
+    my $screen_name = $tweet->{user}{screen_name} . ' ' x (15 - $len);
     my $space = ' ' x 15;
     if (length($text) > 70) {
         $text = substr($text, 0, 70) . "\n" . substr($text, 71);
@@ -114,7 +104,7 @@ sub tweet_processor {
             if ($token =~ m!http://twitpic\.com/(\w+)!) {
                 my $encoded = encode_entities($1);
 
-                $html .= qq{<a href="http://twitpic.com/$encoded">
+                $html .= qq{<a href="http://twitpic.com/$encoded" target="_blank">
                     <img src="http://twitpic.com/show/thumb/$encoded" class="thumb" /></a>};
 
             } elsif ($token =~ m!http://yfrog\.com/(\w+)!) {
