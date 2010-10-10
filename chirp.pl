@@ -126,11 +126,11 @@ sub tweet_processor {
                 $html .= qq{<a href="http://www.nicovideo.jp/watch/sm$encoded" target="_blank">
                     <img src="http://tn-skr2.smilevideo.jp/smile?i=$encoded" class="thumb" /></a>};
 
-            } elsif ($token =~ m!(http://tweetphoto\.com/\d+)!) {
+            } elsif ($token =~ m!(http://plixi\.com/p/\d+)!) {
                 my $encoded = encode_entities($1);
 
                 $html .= qq{<a href="$encoded" target="_blank">
-                    <img src="http://tweetphotoapi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$encoded"
+                    <img src="http://api.plixi.com/api/TPAPI.svc/imagefromurl?size=medium&url=$encoded"
                         class="thumb" /></a>};
 
             } elsif ($token =~ m!http://gyazo\.com/(\w+)\.png!) {
