@@ -54,6 +54,7 @@ my $listener = AnyEvent::Twitter::Stream->new(
     method          => 'userstream',
     on_tweet        => \&on_tweet,
     timeout         => 300,
+    on_error        => sub { exit; },
 );
 
 $cv->recv;
