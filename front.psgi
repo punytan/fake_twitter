@@ -8,6 +8,7 @@ use Plack;
 use Plack::Builder;
 use Plack::Session;
 use Plack::Session::Store::TokyoTyrant;
+use Plack::Middleware::DoCoMoGUID;
 
 use JSON;
 use Text::Xslate;
@@ -16,6 +17,10 @@ use Web::Scraper;
 
 my $phrase = &load_phrase;
 warn $phrase;
+
+my $guid = &load_guid;
+warn $guid;
+
 my $storage = 'http://localhost:5000/';
 
 my $xslate = Text::Xslate->new(
@@ -30,6 +35,8 @@ builder {
 
     enable 'Session',
         store => Plack::Session::Store::TokyoTyrant->new(server => ['localhost', 1978]);
+
+    enable_if { $_[0]->{HTTP_USER_AGENT} =~ m/DoCoMo/i } "DoCoMoGUID";
 
     mount '/' => \&app;
     mount '/login' => \&login;
@@ -46,6 +53,14 @@ sub load_phrase {
     close $fh;
     chomp $phrase;
     return $phrase;
+}
+
+sub load_guid {
+    open my $fh, '<', 'guid' or die $!;
+    my $guid = <$fh>;
+    close $fh;
+    chomp $guid;
+    return $guid;
 }
 
 sub api_status {
@@ -113,7 +128,8 @@ sub timeline {
     my $env = shift;
 
     my $s = $env->{'psgix.session'};
-    return [500, ['Content-Type' => 'text/html'], []] unless ($s->{verified});
+    return [500, ['Content-Type' => 'text/html'], []]
+        unless ($s->{verified} ||  $env->{'HTTP_X_DCMGUID'} eq $guid);
 
     my $req = Plack::Request->new($env);
     my $v = $req->parameters;
@@ -127,10 +143,19 @@ sub timeline {
     my $res_unread = $ua->get($storage . 'unread/count');
     my $unread_count = decode_json($res_unread->content);
 
-    my $content = $xslate->render("timeline.xt", {
+    my $content;
+    if ($env->{'HTTP_X_DCMGUID'}) {
+        $content = $xslate->render("timeline_mobile.xt",{
             json => $json,
             unread_count => $unread_count,
         });
+
+    } else {
+        $content = $xslate->render("timeline.xt", {
+            json => $json,
+            unread_count => $unread_count,
+        });
+    }
 
     return [
         200,
@@ -162,6 +187,7 @@ sub login {
             ['Content-Type' => 'text/html'],
             [encode_utf8('<a href="/timeline?filter=timeline">/timeline</a>')]
         ];
+
     } else {
         return [301, ['Location' => '/'], []];
     }

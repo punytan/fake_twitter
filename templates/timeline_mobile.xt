@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>FakeTwitter</title>
+    </head>
+    <body>
+
+        : if $json.size() < 3 {
+        <div> There is no item to render.</div>
+        : }
+
+        : if $json.success == 1 {
+        :   for $json[$json.filter].kv() -> $pair {
+        :       my $item = $json[$json.filter][$pair.key]
+
+        <div>
+            <div>
+                <img src="<: $item.user.profile_image_url :>" with="16px" height="16px" />
+                <span><: $item.user.screen_name :> (<: $item.user.friends_count :> /
+                    <: $item.user.followers_count :>)</span>
+            </div>
+            <blockquote>
+                <: $item.processed | raw :>
+            </blockquote>
+            <div align="right"><: $item.created_at :></div>
+        </div>
+
+        <hr>
+
+        :   }
+        : }
+
+        <ul>
+            : for $unread_count.kv() -> $pair {
+            :   if ($pair.key == 'success') {
+            :   } elsif ($pair.key == '') {
+            :   } elsif ($pair.value == 0) {
+            :   } else {
+
+            <li>
+            <a href="/timeline?filter=<: $pair.key :>">
+                <: $pair.key :></a><b> (<: $pair.value :>) </b>
+            </li>
+
+            :   }
+            : }
+
+            : if $unread_count.size() == 0 {
+            <li>no unread tab</li>
+            : }
+        </ul>
+        <hr>
+
+    </body>
+</html>
+
