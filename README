@@ -5,13 +5,15 @@ Preparations
     0. Install following modules
         * AnyEvent
         * AnyEvent::Twitter
+        * AnyEvent::Twitter::Stream
         * Tatsumaki
         * URI
         * JSON
         * Perl6::Slurp
         * Data::Validate::URI
         * Plack
-        * Plack::Session::Store::File
+        * Plack::Session::Store::TokyoTyrant
+        * Plack::Middleware::DoCoMoGUID
         * Text::Xslate
         * Web::Scraper
 
@@ -22,6 +24,8 @@ Preparations
     3. $ mkdir log session
 
     4. $ echo 'YourLoginPassPhrase' > phrase
+
+    5. $ echo 'YourGUID' > guid
 
 Usage
 
