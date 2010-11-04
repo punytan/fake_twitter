@@ -158,7 +158,7 @@ sub tweet_processor {
         } elsif ($token =~ m!^co\d+!) {
             my $co = encode_entities($token);
             $html .= qq{<a href="http://com.nicovideo.jp/community/$co" target="_blank">
-                <img src="http://icon.nimg.jp/community/s/$co.jpg" style="height:64px;width:64px;" /></a>};
+                <img src="http://icon.nimg.jp/community/s/$co.jpg" style="height:32px;width:32px;" /></a>};
 
         } else {
             $html .= encode_entities($token);
