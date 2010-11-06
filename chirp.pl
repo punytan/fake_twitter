@@ -37,15 +37,6 @@ my $cv = AE::cv;
 
 open my $outfile, '+>>', 'chirp.log' or die $!;
 
-my $file; $file = new AnyEvent::Handle
-    fh => $outfile,
-    on_error => sub {
-        my ($file_hdl, $fatal, $msg) = @_;
-        warn "Error $msg";
-        $file_hdl->destroy;
-        $cv->send;
-    };
-
 my $listener = AnyEvent::Twitter::Stream->new(
     consumer_key    => $config->{consumer_key},
     consumer_secret => $config->{consumer_secret},
@@ -89,7 +80,7 @@ sub write_log {
 
     my $line = encode_utf8("$screen_name| $text \n");
     print $line;
-    $file->push_write($line);
+    print $outfile $line;
 }
 
 sub tweet_processor {
