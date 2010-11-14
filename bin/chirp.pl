@@ -54,12 +54,15 @@ sub on_tweet {
 
     return unless $tweet->{text};
 
-    $tweet->{processed} = tweet_processor($tweet);
-    $tweet->{created_at} = scalar localtime;
+    if ($tweet->{source} =~ />(.+)</) {
+        $tweet->{source} = $1;
+    }
 
-    return unless $tweet->{processed};
+    my $escaped = $recursive->encode_numeric($tweet);
+    $escaped->{processed} = tweet_processor($tweet);
+    $escaped->{created_at} = scalar localtime;
 
-    my $escaped = $tweet;#$recursive->encode_numeric($tweet);
+    return unless $escaped->{processed};
 
     my $tweet_text = JSON::to_json($escaped);
     say $tweet_text;
