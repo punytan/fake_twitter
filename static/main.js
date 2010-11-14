@@ -19,6 +19,7 @@ function load(v) {
                 $("div#timeline").append( $('<div>').attr({id:id}) );
 
                 if (r[i].retweeted_status.text) $("div#" + id).css("background-color", "#ffc");
+                if (/pun[y|i]tan/.test(r[i]["processed"])) $("div#" + id).css("background-color", "pink");
 
                 $("div#" + id).append(
                     $('<div>').append(
