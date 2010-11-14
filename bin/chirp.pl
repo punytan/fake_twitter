@@ -94,7 +94,7 @@ sub tweet_processor {
         url   => q{<a href="%s" target="_blank">%s</a>},
         reply => q{@<a href="http://twitter.com/%s" target="_blank">%s</a>},
         hash  => q{<a href="http://search.twitter.com/search?q=%%23%s" target="_blank">%s</a>},
-        community => q{<img src="http://icon.nimg.jp/community/s/%s.jpg class="thumb_mini" />},
+        community => q{<img src="http://icon.nimg.jp/community/s/%s.jpg" class="thumb_mini" />},
     );
 
     my $html = '';
