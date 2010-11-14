@@ -88,6 +88,7 @@ sub tweet_processor {
                     'tn-skr2.smilevideo.jp/smile?i=%s', '%s'),
         plixi   => sprintf($tag, '%s',
                     'http://api.plixi.com/api/TPAPI.svc/imagefromurl?size=medium&url=http://%s'),
+        instagram => sprintf($tag, 'instagr.am/p/%s', 'api.linknode.net/instagram/%s'),
     ); 
 
     my %basic = (
@@ -128,6 +129,10 @@ sub tweet_processor {
             } elsif ($token =~ m!http://gyazo\.com/(\w+)\.png!) {
                 my $encoded = encode_entities($1);
                 $html .= sprintf $web{gyazo}, $safe_token, $encoded, $safe_token;
+
+            } elsif ($token =~ m!http://instagr.am/p/(\w+)!) {
+                my $encoded = encode_entities($1);
+                $html .= sprintf $web{instagram}, $encoded, $encoded, $safe_token;
 
             } else {
                 $html .= sprintf $basic{url}, $safe_token, $safe_token;
