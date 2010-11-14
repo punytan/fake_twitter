@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>MobileRoot</title>
+</head>
+<body>
+
+: for $list -> $item {
+    <div>
+        <div>
+            <img src="<: $item.user.profile_image_url :>" with="16px" height="16px" />
+            <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
+        </div>
+
+        <blockquote><: $item.processed | raw :></blockquote>
+
+        <div align="right"><: $item.created_at :></div>
+    </div>
+    <hr />
+: }
+
+: if $list.size() == 0 {
+    <div> There is no item to render.</div>
+    <hr />
+: }
+
+<ul>
+: for $unread.keys() -> $key {
+:   if $unread[$key] == 0 {
+:       # skip
+:   } else {
+        <li><a href="/mobile?guid=on&filter=<: $key :>"><: $key :></a>(<: $unread[$key] :>)</li>
+:   }
+: }
+</ul>
+
+<hr />
+
+</body>
+</html>
+

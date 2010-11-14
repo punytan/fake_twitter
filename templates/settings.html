@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Settings</title>
+<script src="/static/jquery.js"></script>
+<script>
+
+function load () {
+    $.ajax({
+        url: "/api/filter",
+        data: { },
+        type: 'get',
+        dataType: 'json',
+        success: function(r) {
+            $('div#filter_list > div').remove();
+
+            for (var i in r) {
+                if ($('div#' + r[i] + ' div:last').val() == undefined) {
+                    $('div#filter_list').append(
+                        $('<div>').attr({id : r[i]}).append(
+                            $('<div>').append(r[i]).addClass('fn')));
+                }
+
+                $('div#filter_list > div#' + r[i]).append(
+                    $('<div>').append(i).addClass('name'));
+            }
+        }
+    });
+}
+
+$(function () {
+    $("#new").submit(function () {
+        var screen_name = $("input##screen_name").val();
+        var filter      = $("input#filter").val();
+
+        $.ajax({
+            url: "/api/filter",
+            data: {
+                screen_name : screen_name,
+                filter : filter
+            },
+            type: 'post',
+            dataType: 'json',
+            success: function(r) {
+                load();
+            }
+        });
+    });
+});
+
+$(function () { load(); });
+
+</script>
+
+<style>
+
+    .fn { background-color : pink; }
+    .name { margin-left : 0px; }
+    #filter_list { float : left; }
+    #filter_list > div { float : left; border : 1px solid #ccc; margin : 5px; padding : 5px;}
+
+</style>
+
+</head>
+<body>
+
+    <div id="side">
+        <form action="javascript:" method="POST" id="new">
+            name: <input type="TEXT" name="screen_name" id="screen_name" />
+            filter: <input type="TEXT" name="filter" id="filter" />
+            <input type="SUBMIT" />
+        </form>
+    </div>
+
+    <div id="filter_list">
+    </div>
+
+</body>
+</html>
+

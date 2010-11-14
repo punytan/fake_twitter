@@ -1,0 +1,188 @@
+* {
+    margin  : 0px;
+    padding : 0px;
+    font-size : 0.9em;
+}
+
+a {
+    color : #2276BB;
+    text-decoration : none;
+}
+
+img.thumb {
+    height : 150px;
+    width  : 150px;
+    vertical-align : text-top;
+}
+
+img.thumb_mini {
+    height : 32px;
+    width  : 32px;
+    vertical-align : text-top;
+}
+
+div#containar {
+    width  : 100%;
+}
+
+div#main {
+    width  : 80%;
+    height : 50%;
+    float : left;
+}
+
+div#timeline {
+    margin : 5%;
+}
+
+div#timeline > div {
+    padding : 10px;
+    border-bottom : 1px dotted #ccc;
+    vertical-align : middle;
+}
+
+div#timeline div.fn {
+    font-size : 1.2em;
+    font-weight : bold;
+    background-color : #f8f8f8;
+}
+
+div#timeline div.iconarea {
+    float : left;
+    text-align : center;
+    margin : 5px;
+    color : #999;
+    font-size : 0.8em;
+    width : 100px;
+}
+
+div#timeline img.icon {
+    height : 32px;
+    width : 32px;
+}
+
+div#timeline div.tweetholder {
+}
+
+div#timeline div.tweetholder span {
+    margin : 5px;
+}
+
+div#timeline div.via {
+    margin : 5px;
+    text-align : right;
+    font-size : 0.8em;
+}
+
+div#timeline div.via > .rt, .unofficialrt, .reply, .fav {
+    color : #2276BB;
+}
+
+div#timeline div.retweeted_by {
+    margin : 5px;
+    font-size : 0.8em;
+}
+
+div#timeline div.in_reply_to_status_id {
+    margin-left : 200px;
+    font-size : 0.8em;
+}
+
+div#timeline div.clear {
+    clear : both;
+}
+
+div#side {
+    width  : 20%;
+    height : 100%;
+    opacity : 0.8;
+    position: fixed;
+    margin-left : 80%;
+    border-left : 1px dotted #ccc;
+    background-color : #f0f0f0;
+}
+
+div.tools {
+    margin : 5%;
+    padding-bottom : 15px;
+    border-bottom  : 1px dotted #ccc;
+}
+
+div#tweet {
+    text-align : center;
+    margin-top : 25px;
+}
+
+div#tweet .counter{
+    position : absolute;
+    color : #ccc;
+    right : 10px;
+    top   : 0;
+    font-size   : 20px;
+    font-weight : bold;
+}
+
+div#tweet .warning{
+    color : #600;
+}
+
+div#tweet .exceeded{
+    color : #e00;
+}
+
+div#tweet textarea {
+    margin  : 5px 0px 10px 0px;
+    padding : 10px;
+    height  : 125px;
+    width   : 80%;
+    color   : #666;
+    border  : #999 1px solid;
+    font-size   : 14px;
+    font-family : "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    transition  : all 0.25s ease-in-out;
+    -moz-transition    : all 0.25s ease-in-out;
+    box-shadow         : 0 0 5px rgba(81, 203, 238, 0);
+    -moz-box-shadow    : 0 0 5px rgba(81, 203, 238, 0);
+    -moz-border-radius : 8px;
+}
+
+div#tweet textarea:focus {
+    color   : #000;
+    outline : none;
+    border  : #35a5e5 1px solid;
+    font-family     : "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    box-shadow      : 0 0 5px rgba(81, 203, 238, 1);
+    -moz-box-shadow : 0 0 5px rgba(81, 203, 238, 1);
+}
+
+div#tweet input.submit {  
+    width  : 40%;
+    color  : #eee; 
+    border : none;
+    margin-top : 10px;
+    border-radius      : 4px; 
+    background-color   : #18a5cc;
+    -moz-border-radius : 4px; 
+    background : -moz-linear-gradient(25% 75% 90deg,#0a85a8, #18a5cc);       
+} 
+
+div#tweet input.submit:hover {        
+    cursor : pointer; 
+    box-shadow      : 0px 0px 20px #555;  
+    -moz-box-shadow : 0px 0px 20px #aaa; 
+}
+
+div#ap-switch div {
+    width : 80%;
+    font-family : "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+div#tabs {
+    overflow : scroll;
+}
+
+div#next {
+    text-align : center;
+    width : 300px;
+    margin : 0 auto;
+}

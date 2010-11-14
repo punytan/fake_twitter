@@ -1,55 +1,13 @@
-fake_twitter
+Create following files. See also config_sample/
 
-Preparations
+config/
+|-- filter.pl
+|-- guid.pl
+|-- oauth.pl
+|-- phrase.pl
+`-- secret.pl
 
-    0. Install following modules
-        * AnyEvent
-        * AnyEvent::Twitter
-        * AnyEvent::Twitter::Stream
-        * Tatsumaki
-        * URI
-        * JSON
-        * Perl6::Slurp
-        * Data::Validate::URI
-        * Plack
-        * Plack::Session::Store::TokyoTyrant
-        * Plack::Middleware::DoCoMoGUID
-        * Text::Xslate
-        * Web::Scraper
+Run starter.sh
 
-    1. Create a 'oauth.json' file using http://cpansearch.perl.org/src/PUNYTAN/AnyEvent-Twitter-0.51/eg/gen_token.pl
+Run bin/chirp.pl using daemontools.
 
-    2. $ touch '{}' > filter.json
-
-    3. $ mkdir log session
-
-    4. $ echo 'YourLoginPassPhrase' > phrase
-
-    5. $ echo 'YourGUID' > guid
-
-Usage
-
-    1. $ plackup -p 5000 -s Twiggy kvs.psgi > /dev/null 2>&1 &
-
-    2. $ perl chirp.pl
-
-    3. $ plackup -p 3000 front.psgi > /dev/null 2>&1 &
-
-    4. $ tail -f chirp.log
-        This enables you to peep at real time tweet log.
-
-Note
-
-    * Do not expose the port 5000 to the outside of your local network because there is no verification transaction.
-
-    * I use nginx to enable reverse proxy.
-
-    * I use daemontools for logging and watching process.
-
-TODO
-
-    1. Clean these code up.
-
-LICENSE
-
-    This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
