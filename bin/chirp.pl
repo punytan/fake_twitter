@@ -130,7 +130,7 @@ sub tweet_processor {
                 my $encoded = encode_entities($1);
                 $html .= sprintf $web{gyazo}, $safe_token, $encoded, $safe_token;
 
-            } elsif ($token =~ m!http://instagr.am/p/(\w+)!) {
+            } elsif ($token =~ m!http://instagr.am/p/([\w\-]+)!) {
                 my $encoded = encode_entities($1);
                 $html .= sprintf $web{instagram}, $encoded, $encoded, $safe_token;
 
