@@ -2,8 +2,6 @@ use common::sense;
 use Encode;
 use Data::Dumper;
 
-use lib '/home/puny/space/HTML-Entities-Recursive/lib';
-
 use AnyEvent;
 use AnyEvent::HTTP;
 use AnyEvent::Twitter;
