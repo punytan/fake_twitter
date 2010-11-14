@@ -107,7 +107,7 @@ function load_reply(id) {
             success: function(r) {
                 //console.log($('div#' + id).val() );
                 if ($('div#' + id).val() != '') return;
-                $('div#' + id).append(
+                $('div.' + id).append(
                     $('<img>').attr({src: r[1].user.profile_image_url,}).css(
                         {width:'16px', height:'16px'}),
                     $('<span>').append(r[1].text));
