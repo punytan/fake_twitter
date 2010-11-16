@@ -7,7 +7,7 @@ config/
 |-- phrase.pl
 `-- secret.pl
 
-Run starter.sh
+Run ./run.sh
 
 Run bin/chirp.pl using daemontools.
 
