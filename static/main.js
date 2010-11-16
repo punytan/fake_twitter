@@ -154,26 +154,49 @@ $(function () {
 
     $('span.fav').live('click', function () {
         var id = this.parentNode.parentNode.id;
-        $.ajax({
-            url: "/twitter/favorites/create/" + id,
-            data: { },
-            type: 'post',
-            dataType: 'json',
-            success: function(r) {
-                //console.log(r);
+        lbdialog({
+            content: 'Fav it?',
+            cancelButton: {
+                text: 'No'
+            },
+            OKButton: {
+                text: 'Yes',
+                callback: function () {
+                    lbdialog({content: 'done', autoDisappear: 3});
+                    $.ajax({
+                        url: "/twitter/favorites/create/" + id,
+                        data: { },
+                        type: 'post',
+                        dataType: 'json',
+                        success: function(r) {
+                            //console.log(r);
+                        }
+                    });
+                }
             }
         });
     });
 
     $('span.rt').live('click', function () {
         var id = this.parentNode.parentNode.id;
-        $.ajax({
-            url: "/twitter/statuses/retweet/" + id,
-            data: { },
-            type: 'post',
-            dataType: 'json',
-            success: function(r) {
-                //console.log(r);
+        lbdialog({
+            content: 'Retweet it?',
+            cancelButton: {
+                text: 'No'
+            },
+            OKButton: {
+                text: 'Yes',
+                callback: function () {
+                    $.ajax({
+                        url: "/twitter/statuses/retweet/" + id,
+                        data: { },
+                        type: 'post',
+                        dataType: 'json',
+                        success: function(r) {
+                            //console.log(r);
+                        }
+                    });
+                }
             }
         });
     });
@@ -197,8 +220,19 @@ $(function () {
     });
 
     $('#statuses_update').submit(function () {
-        statuses_update( $('#statuses_update textarea[name="status"]').val() );
-        $('#statuses_update textarea[name="status"]').val('')
+        lbdialog({
+            content: 'Do you want to update status?',
+            cancelButton: {
+                text: 'No'
+            },
+            OKButton: {
+                text: 'Yes',
+                callback: function () {
+                    statuses_update( $('#statuses_update textarea[name="status"]').val() );
+                    $('#statuses_update textarea[name="status"]').val('')
+                }
+            }
+        });
     });
 
     $("#new_filter").submit(function () {
