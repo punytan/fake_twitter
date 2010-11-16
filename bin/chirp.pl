@@ -88,7 +88,7 @@ sub tweet_processor {
         nico    => sprintf($tag, 'nicovideo.jp/watch/sm%s',
                     'tn-skr2.smilevideo.jp/smile?i=%s', '%s'),
         plixi   => sprintf($tag, '%s',
-                    'http://api.plixi.com/api/TPAPI.svc/imagefromurl?size=medium&url=http://%s'),
+                    'api.plixi.com/api/TPAPI.svc/imagefromurl?size=medium&url=http://%s'),
         instagram => sprintf($tag, 'instagr.am/p/%s', 'api.linknode.net/instagram/%s'),
     ); 
 
