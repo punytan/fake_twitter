@@ -83,8 +83,10 @@ use JSON;
 use Encode;
 use Try::Tiny;
 use AnyEvent::Twitter;
+use HTML::Entities::Recursive;
 
 my $ua = AnyEvent::Twitter->new(%$main::OAuth);
+my $recursive = HTML::Entities::Recursive->new;
 
 sub get {
     my $self = shift;
@@ -128,8 +130,15 @@ sub post {
 
 sub on_response {
     my $self = shift;
+    my ($hdr, $res, $reason) = @_;
+
+    if ($res) {
+        $res = $recursive->decode($res);
+        $res = $recursive->encode_numeric($res);
+    }
+
     $self->response->content_type('application/json');
-    $self->finish(JSON::to_json(\@_));
+    $self->finish(JSON::to_json([$hdr, $res, $reason]));
 }
 
 package Settings;
