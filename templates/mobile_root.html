@@ -7,16 +7,22 @@
 <body>
 
 : for $list -> $item {
-    <div>
-        <div>
-            <img src="<: $item.user.profile_image_url :>" with="16px" height="16px" />
-            <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
-        </div>
+    <table <: if ($item.retweeted_status) { :> bgcolor="#FFF8DC" <: } :>>
+        <tr>
+            <td>
+                <img src="<: $item.user.profile_image_url :>" with="16px" height="16px" />
+                <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
+            </td>
+        </tr>
 
-        <blockquote><: $item.processed | raw :></blockquote>
+        <tr>
+            <td><blockquote><: $item.processed | mark_raw :></blockquote></td>
+        </tr>
 
-        <div align="right"><: $item.created_at :></div>
-    </div>
+        <tr>
+            <td align="right"><: $item.created_at :></td>
+        </tr>
+    </table>
     <hr />
 : }
 
