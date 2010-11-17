@@ -55,10 +55,11 @@ function load(v) {
                 $("div#" + id).append( $('<div>').addClass('clear') );
 
                 if (r[i].in_reply_to_status_id) {
+                    var target = r[i].in_reply_to_status_id + Math.floor(Math.random() * 10000);
                     $("div#timeline").append(
                         $('<div>').addClass('in_reply_to_status_id').attr(
-                            {id:r[i].in_reply_to_status_id}).addClass(r[i].in_reply_to_status_id));
-                    load_reply(r[i].in_reply_to_status_id);
+                            {id:target}).addClass(target));
+                    load_reply(r[i].in_reply_to_status_id, target);
                 }
             }
 
@@ -98,8 +99,8 @@ function statuses_update(status) {
     });
 }
 
-function load_reply(id) {
-    $('div.' + id).append(function () {
+function load_reply(id, target) {
+    $('div#' + target).append(function () {
         $.ajax({
             url: "/twitter/statuses/show/" + id,
             data: { },
@@ -107,11 +108,11 @@ function load_reply(id) {
             dataType: 'json',
             success: function(r) {
                 //console.log($('div#' + id).val() );
-                if ($('div#' + id).val() != '') return;
-                $('div.' + id).append(
-                    $('<img>').attr({src: r[1].user.profile_image_url,}).css(
-                        {width:'16px', height:'16px'}),
-                    $('<span>').append(r[1].text));
+                if ($('div#' + target).val() != '') return;
+                $('div#' + target).append(
+                    $('<img>').attr({src: r[1].user.profile_image_url}).addClass('icon'),
+                    $('<span>').append(r[1].text)
+                );
             }
         });
     });
