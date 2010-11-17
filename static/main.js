@@ -133,8 +133,6 @@ $(window).scroll(function () {
 $(function () {
     load();
 
-    setInterval(function () { load_unread(); }, 20000);
-
     $("textarea").charCount();
 
     $('#can_load_next').iphoneSwitch("on",
