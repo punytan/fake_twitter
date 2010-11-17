@@ -4,6 +4,10 @@
     font-size : 0.9em;
 }
 
+body {
+    background : #ffffff url('https://github.com/issm/SliDegeso/raw/master/img/geso0.png') no-repeat fixed right top;
+}
+
 a {
     color : #2276BB;
     text-decoration : none;
