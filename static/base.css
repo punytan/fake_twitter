@@ -4,6 +4,10 @@
     font-size : 0.9em;
 }
 
+html, body {
+    height : 100%;
+}
+
 body {
     background : #ffffff url('https://github.com/issm/SliDegeso/raw/master/img/geso0.png') no-repeat fixed right top;
 }
@@ -27,12 +31,16 @@ img.thumb_mini {
 
 div#containar {
     width  : 100%;
+    height : 100%;
 }
 
 div#main {
     width  : 80%;
-    height : 50%;
+    height : auto;
+    min-height : 100%;
     float : left;
+    opacity : 0.95;
+    background-color : #fff;
 }
 
 div#timeline {
