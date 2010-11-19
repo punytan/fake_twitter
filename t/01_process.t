@@ -44,7 +44,7 @@ ok Text::Twitter::process($web_movapic)
 
 my $web_gyazo = { text => '!http://gyazo.com/e872e7277689674cbc7744052e46acf0.png' };
 ok Text::Twitter::process($web_gyazo)
-    eq q{!<img src="http://gyazo.com/e872e7277689674cbc7744052e46acf0.png" class="thumb" /><a href="http://http://gyazo.com/e872e7277689674cbc7744052e46acf0.png" target="_blank">http://gyazo.com/e872e7277689674cbc7744052e46acf0.png</a>}, 'web gyazo';
+    eq q{!<img src="http://gyazo.com/e872e7277689674cbc7744052e46acf0.png" class="thumb" /><a href="http://gyazo.com/e872e7277689674cbc7744052e46acf0.png" target="_blank">http://gyazo.com/e872e7277689674cbc7744052e46acf0.png</a>}, 'web gyazo';
 
 my $web_nico = { text => 'http://nico.ms/sm9 http://www.nicovideo.jp/watch/sm9' };
 ok Text::Twitter::process($web_nico)

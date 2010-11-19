@@ -20,7 +20,7 @@ our %web = (
     yfrog     => sprintf($tag, 'yfrog.com/%s.th.jpg', 'yfrog.com/%s', '%s'),
     twitpic   => sprintf($tag, 'twitpic.com/show/thumb/%s', 'twitpic.com/%s', '%s'),
     movapic   => sprintf($tag, 'image.movapic.com/pic/m_%s.jpeg', 'movapic.com/pic/%s', '%s'),
-    gyazo     => sprintf($tag, 'gyazo.com/%s.png', '%s', '%s'),
+    gyazo     => sprintf($tag, 'gyazo.com/%s.png', 'gyazo.com/%s.png', '%s'),
     instagram => sprintf($tag, 'api.linknode.net/instagram/%s', 'instagr.am/p/%s', '%s'),
     nico      => sprintf($tag,
         'tn-skr2.smilevideo.jp/smile?i=%s', 'www.nicovideo.jp/watch/sm%s', '%s'),
@@ -73,7 +73,7 @@ sub process {
 
             } elsif ($token =~ m!http://gyazo\.com/(\w+)\.png!) {
                 my $encoded = encode_entities($1);
-                $html .= sprintf $web{gyazo}, $encoded, $safe_token, $safe_token;
+                $html .= sprintf $web{gyazo}, $encoded, $encoded, $safe_token;
 
             } elsif ($token =~ m!http://instagr.am/p/([\w\-]+)!) {
                 my $encoded = encode_entities($1);
