@@ -110,8 +110,11 @@ function load_reply(id, target) {
                 //console.log($('div#' + id).val() );
                 if ($('div#' + target).val() != '') return;
                 $('div#' + target).append(
-                    $('<img>').attr({src: r[1].user.profile_image_url}).addClass('icon'),
-                    $('<span>').append(r[1].text)
+                    $('<div>').append(
+                        $('<img>').attr({src: r[1].user.profile_image_url}).addClass('icon')).addClass('iconarea'),
+                    $('<div>').append(
+                        $('<span>').append(r[1].text)).addClass('tweetholder'),
+                    $('<div>').addClass('clear')
                 );
             }
         });

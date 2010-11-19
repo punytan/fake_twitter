@@ -96,8 +96,8 @@ div#timeline div.retweeted_by {
 }
 
 div#timeline div.in_reply_to_status_id {
-    margin-left : 200px;
-    font-size : 0.8em;
+    margin-left  : 5%;
+    margin-right : 5%;
 }
 
 div#timeline div.clear {
