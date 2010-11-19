@@ -26,21 +26,20 @@ my $recursive = HTML::Entities::Recursive->new;
 my $ua        = AnyEvent::Twitter->new(%$OAuth);
 my $client    = Tatsumaki::HTTPClient->new;
 
-my $cv = AE::cv;
-
-my $listener = AnyEvent::Twitter::Stream->new(
-    consumer_key    => $OAuth->{consumer_key},
-    consumer_secret => $OAuth->{consumer_secret},
-    token           => $OAuth->{access_token},
-    token_secret    => $OAuth->{access_token_secret},
-    method          => 'userstream',
-    on_tweet        => \&on_tweet,
-    timeout         => 300,
-    on_error        => sub { exit; },
-);
-
-$cv->recv;
-
+while (1) {
+    my $cv = AE::cv;
+    my $listener = AnyEvent::Twitter::Stream->new(
+        consumer_key    => $OAuth->{consumer_key},
+        consumer_secret => $OAuth->{consumer_secret},
+        token           => $OAuth->{access_token},
+        token_secret    => $OAuth->{access_token_secret},
+        method          => 'userstream',
+        timeout         => 45,
+        on_tweet        => \&on_tweet,
+        on_error        => sub { $cv->send; },
+    );
+    $cv->recv;
+}
 exit;
 
 sub on_tweet {
