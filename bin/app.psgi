@@ -335,6 +335,8 @@ package main;
 use common::sense;
 
 use Plack::Builder;
+use Plack::Middleware::Session;
+use Plack::Session::Store::File;
 use Plack::Session::State::Cookie;
 use Plack::Middleware::DoCoMoGUID;
 use Tatsumaki::Application;
@@ -376,6 +378,9 @@ builder {
 
     mount '/' => builder {
         enable 'Session',
+            store => Plack::Session::Store::File->new(
+                dir => File::Basename::dirname(__FILE__) . "/../sessions"
+            ),
             state => Plack::Session::State::Cookie->new(
                 session_key => 'uid',
             );
