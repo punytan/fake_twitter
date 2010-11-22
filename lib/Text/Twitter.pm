@@ -26,6 +26,7 @@ our %web = (
         'tn-skr2.smilevideo.jp/smile?i=%s', 'www.nicovideo.jp/watch/sm%s', '%s'),
     plixi     => sprintf($tag,
         'api.plixi.com/api/TPAPI.svc/imagefromurl?size=medium&url=http://%s', '%s', '%s'),
+    twipple   => sprintf($tag, 'p.twipple.jp/data/%s_m.jpg', 'p.twipple.jp/%s', '%s'),
 );
 
 our %basic = (
@@ -78,6 +79,12 @@ sub process {
             } elsif ($token =~ m!http://instagr.am/p/([\w\-]+)!) {
                 my $encoded = encode_entities($1);
                 $html .= sprintf $web{instagram}, $encoded, $encoded, $safe_token;
+
+            } elsif ($token =~ m!http://p\.twipple\.jp/([\w]+)!) {
+                my $encoded = encode_entities($1);
+                my @part = join '/', split //, $encoded;
+                my $str = join '', @part;
+                $html .= sprintf $web{twipple}, $str, $encoded, $safe_token;
 
             } else {
                 $html .= sprintf $basic{url}, $safe_token, $safe_token;

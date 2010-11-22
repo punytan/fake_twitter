@@ -58,5 +58,9 @@ my $web_plixi = { text => 'language! http://plixi.com/p/57448825' };
 ok Text::Twitter::process($web_plixi)
     eq q{language! <img src="http://api.plixi.com/api/TPAPI.svc/imagefromurl?size=medium&url=http://plixi.com/p/57448825" class="thumb" /><a href="http://plixi.com/p/57448825" target="_blank">http://plixi.com/p/57448825</a>}, 'web plixi';
 
+my $web_twipple = { text => 'language! http://p.twipple.jp/myhP4' };
+ok Text::Twitter::process($web_twipple)
+    eq q{language! <img src="http://p.twipple.jp/data/m/y/h/P/4_m.jpg" class="thumb" /><a href="http://p.twipple.jp/myhP4" target="_blank">http://p.twipple.jp/myhP4</a>}, 'web twipple';
+
 done_testing;
 
