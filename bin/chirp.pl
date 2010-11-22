@@ -18,6 +18,8 @@ use File::Basename;
 use lib File::Basename::dirname(__FILE__) . '/../lib/';
 use Text::Twitter;
 
+$| = 1;
+
 my $confbase = File::Basename::dirname(__FILE__) . '/../config/';
 my $OAuth    = do File::Spec->catfile($confbase, 'oauth.pl')  or die $!;
 my $secret   = do File::Spec->catfile($confbase, 'secret.pl') or die $!;
@@ -27,6 +29,7 @@ my $ua        = AnyEvent::Twitter->new(%$OAuth);
 my $client    = Tatsumaki::HTTPClient->new;
 
 while (1) {
+    logging("IMPORTANT: wake up");
     my $cv = AE::cv;
     my $listener = AnyEvent::Twitter::Stream->new(
         consumer_key    => $OAuth->{consumer_key},
@@ -36,7 +39,7 @@ while (1) {
         method          => 'userstream',
         timeout         => 45,
         on_tweet        => \&on_tweet,
-        on_error        => sub { $cv->send; },
+        on_error        => sub { logging("IMPORTANT: on error"); $cv->send; },
     );
     $cv->recv;
 }
@@ -58,10 +61,15 @@ sub on_tweet {
     return unless $escaped->{processed};
 
     my $tweet_text = JSON::to_json($escaped);
-    say $tweet_text;
     $client->post("http://localhost:2222/new", [
         tweet => $tweet_text, secret => $secret
-    ], sub { print Dumper \@_; });
+    ], sub { logging($tweet->{text}); });
+}
+
+sub logging {
+    for (@_) {
+        say sprintf "[%s] %s", scalar localtime, $_;
+    }
 }
 
 __END__
