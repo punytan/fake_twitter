@@ -54,6 +54,9 @@ sub on_tweet {
         $tweet->{source} = $1;
     }
 
+    return if $tweet->{source} =~ /(?:loctouch)/;
+    return if $tweet->{text} =~ /(?:shindanmaker\.com)/;
+
     my $escaped = $recursive->encode_numeric($tweet);
     $escaped->{processed} = Text::Twitter::process($tweet);
     $escaped->{created_at} = scalar localtime;
