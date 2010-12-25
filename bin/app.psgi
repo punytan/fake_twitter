@@ -1,4 +1,5 @@
-use common::sense;
+use strict;
+use warnings;
 use File::Spec;
 use File::Basename;
 use Data::Dumper;
@@ -15,7 +16,6 @@ $main::secret = do File::Spec->catfile($main::confbase, 'secret.pl') or die $!;
 package Logout;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 
 sub get {
     my $self = shift;
@@ -31,7 +31,6 @@ sub get {
 package Login;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 
 sub get {
     my $self = shift;
@@ -62,7 +61,6 @@ sub post {
 package Root;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 
 sub get {
     my $self = shift;
@@ -79,7 +77,6 @@ sub get {
 package Twitter;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 use JSON;
 use Encode;
 use Try::Tiny;
@@ -145,7 +142,6 @@ sub on_response {
 package Settings;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 
 sub get {
     my $self = shift;
@@ -162,7 +158,6 @@ sub get {
 package API::Filter;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 use JSON;
 use Try::Tiny;
 use Data::Dumper;
@@ -215,7 +210,6 @@ sub post {
 package API::Filter::Unread;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 use JSON;
 use Try::Tiny;
 
@@ -239,7 +233,6 @@ sub get {
 package New;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 use JSON;
 use Try::Tiny;
 
@@ -269,7 +262,6 @@ sub post {
 package API::Tweet::Show;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 use JSON;
 
 sub get {
@@ -295,7 +287,6 @@ sub get {
 package Mobile::Root;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use common::sense;
 use Encode;
 use Text::Xslate;
 
@@ -335,7 +326,6 @@ sub get {
 }
 
 package main;
-use common::sense;
 
 use Plack::Builder;
 use Plack::Middleware::Session;
