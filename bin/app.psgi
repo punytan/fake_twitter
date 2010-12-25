@@ -3,6 +3,8 @@ use warnings;
 use File::Spec;
 use File::Basename;
 use Data::Dumper;
+use JSON;
+use Encode;
 
 $main::confbase = File::Basename::dirname(__FILE__) . '/../config/';
 
@@ -77,8 +79,6 @@ sub get {
 package Twitter;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use JSON;
-use Encode;
 use Try::Tiny;
 use AnyEvent::Twitter;
 use HTML::Entities::Recursive;
@@ -158,9 +158,7 @@ sub get {
 package API::Filter;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use JSON;
 use Try::Tiny;
-use Data::Dumper;
 
 sub get {
     my $self = shift;
@@ -210,7 +208,6 @@ sub post {
 package API::Filter::Unread;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use JSON;
 use Try::Tiny;
 
 sub get {
@@ -233,7 +230,6 @@ sub get {
 package New;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use JSON;
 use Try::Tiny;
 
 sub post {
@@ -262,7 +258,6 @@ sub post {
 package API::Tweet::Show;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use JSON;
 
 sub get {
     my ($self, $filter) = @_;
@@ -287,7 +282,6 @@ sub get {
 package Mobile::Root;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use Encode;
 use Text::Xslate;
 
 my $xslate = Text::Xslate->new(
