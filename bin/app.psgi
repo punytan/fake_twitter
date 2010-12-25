@@ -20,8 +20,8 @@ use common::sense;
 sub get {
     my $self = shift;
 
-    if ($self->request->env->{'psgix.session'}{verified}) {
-        $self->request->env->{'psgix.session'} = undef;
+    if ($self->request->session->{verified}) {
+        $self->request->session_options->{expire}++;
     }
 
     $self->response->redirect('/');
@@ -36,7 +36,7 @@ use common::sense;
 sub get {
     my $self = shift;
 
-    if ($self->request->env->{'psgix.session'}{verified}) {
+    if ($self->request->session->{verified}) {
         $self->response->redirect('/');
     } else {
         $self->render('login.html', {});
@@ -49,7 +49,8 @@ sub post {
     my $self = shift;
 
     if ($self->request->param('phrase') eq $main::phrase) {
-        $self->request->env->{'psgix.session'}{verified} = 1;
+        $self->request->session->{verified} = 1;
+        $self->request->session_options->{change_id}++;
         $self->response->redirect('/');
     } else {
         $self->render('login.html', {});
@@ -66,7 +67,7 @@ use common::sense;
 sub get {
     my $self = shift;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -92,7 +93,7 @@ sub get {
     my $self = shift;
     my $api  = shift;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -112,7 +113,7 @@ sub post {
     my $self = shift;
     my $api  = shift;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -149,7 +150,7 @@ use common::sense;
 sub get {
     my $self = shift;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -169,7 +170,7 @@ use Data::Dumper;
 sub get {
     my $self = shift;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->env->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -181,7 +182,7 @@ sub get {
 sub post {
     my $self = shift;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -221,7 +222,7 @@ use Try::Tiny;
 sub get {
     my $self = shift;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -274,7 +275,7 @@ use JSON;
 sub get {
     my ($self, $filter) = @_;
 
-    unless ($self->request->env->{'psgix.session'}{verified}) {
+    unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
         $self->finish;
     }
@@ -316,7 +317,9 @@ sub get {
     my @v;
     while (@{$main::Tweets->{$filter}}) {
         last if 20 <= scalar @v;
-        push @v, shift @{$main::Tweets->{$filter}};
+        my $item = shift @{$main::Tweets->{$filter}};
+        $item->{processed} =~ s{http://}{http://mobazilla.jp/index.php?}g;
+        push @v, $item;
     }
 
     my $unread = {};
