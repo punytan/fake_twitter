@@ -54,7 +54,7 @@ sub on_tweet {
         $tweet->{source} = $1;
     }
 
-    return if $tweet->{source} =~ /(?:loctouch)/;
+    return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net)/;
     return if $tweet->{text} =~ /(?:shindanmaker\.com)/;
 
     my $escaped = $recursive->encode_numeric($tweet);
