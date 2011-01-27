@@ -303,7 +303,7 @@ sub get {
     while (@{$main::Tweets->{$filter}}) {
         last if 20 <= scalar @v;
         my $item = shift @{$main::Tweets->{$filter}};
-        $item->{processed} =~ s{http://}{http://mobazilla.jp/index.php?}g;
+        #$item->{processed} =~ s{http://}{http://mobazilla.jp/index.php?}g;
         push @v, $item;
     }
 
