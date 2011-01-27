@@ -10,7 +10,7 @@
     <table <: if ($item.retweeted_status) { :> bgcolor="#FFF8DC" <: } :>>
         <tr>
             <td>
-                <img src="<: $item.user.profile_image_url :>" with="16px" height="16px" />
+                <img src="http://api.linknode.net/twitter_thumbnail?url=<: $item.user.profile_image_url :>" with="16px" height="16px" />
                 <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
             </td>
         </tr>
