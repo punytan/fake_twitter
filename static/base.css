@@ -48,7 +48,7 @@ div#timeline {
 }
 
 div#timeline > div {
-    padding : 10px;
+    padding : 5px;
     border-bottom : 1px dotted #ccc;
     vertical-align : middle;
 }
@@ -69,8 +69,8 @@ div#timeline div.iconarea {
 }
 
 div#timeline img.icon {
-    height : 32px;
-    width : 32px;
+    height : 24px;
+    width : 24px;
 }
 
 div#timeline div.tweetholder {
