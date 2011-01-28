@@ -1,32 +1,22 @@
 use practical;
 use Encode;
-use Data::Dumper;
-
-use AnyEvent;
-use AnyEvent::HTTP;
-use AnyEvent::Twitter;
-use AnyEvent::Twitter::Stream;
-use Tatsumaki::HTTPClient;
-
 use JSON;
-use HTML::Entities;
-use HTML::Entities::Recursive;
-
-use File::Spec;
 use File::Basename;
+use HTML::Entities::Recursive;
+use Tatsumaki::HTTPClient;
+use AnyEvent::Twitter::Stream;
 
 use lib File::Basename::dirname(__FILE__) . '/../lib/';
 use Text::Twitter;
 
 $| = 1;
 
-my $confbase = File::Basename::dirname(__FILE__) . '/../config/';
-my $OAuth    = do File::Spec->catfile($confbase, 'oauth.pl')  or die $!;
-my $secret   = do File::Spec->catfile($confbase, 'secret.pl') or die $!;
-my $ignore   = do File::Spec->catfile($confbase, 'ignore.pl') or die $!;
+my $confbase = File::Basename::dirname(__FILE__) . '/../config';
+my $OAuth    = do "$confbase/oauth.pl"  or die $!;
+my $secret   = do "$confbase/secret.pl" or die $!;
+my $ignore   = do "$confbase/ignore.pl" or die $!;
 
 my $recursive = HTML::Entities::Recursive->new;
-my $ua        = AnyEvent::Twitter->new(%$OAuth);
 my $client    = Tatsumaki::HTTPClient->new;
 
 while (1) {
