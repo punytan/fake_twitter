@@ -1,19 +1,17 @@
-use strict;
-use warnings;
-use File::Spec;
+use practical;
 use File::Basename;
 use Data::Dumper;
 use JSON;
 use Encode;
 
-$main::confbase = File::Basename::dirname(__FILE__) . '/../config/';
+$main::confbase = File::Basename::dirname(__FILE__) . '/../config';
 
 $main::Tweets = {};
-$main::Filter = do File::Spec->catfile($main::confbase, 'filter.pl') or die $!;
-$main::OAuth  = do File::Spec->catfile($main::confbase, 'oauth.pl')  or die $!;
-$main::guid   = do File::Spec->catfile($main::confbase, 'guid.pl')   or die $!;
-$main::phrase = do File::Spec->catfile($main::confbase, 'phrase.pl') or die $!;
-$main::secret = do File::Spec->catfile($main::confbase, 'secret.pl') or die $!;
+$main::Filter = do "$main::confbase/filter.pl" or die $!;
+$main::OAuth  = do "$main::confbase/oauth.pl"  or die $!;
+$main::guid   = do "$main::confbase/guid.pl"   or die $!;
+$main::phrase = do "$main::confbase/phrase.pl" or die $!;
+$main::secret = do "$main::confbase/secret.pl" or die $!;
 
 package Logout;
 use parent 'Tatsumaki::Handler';
