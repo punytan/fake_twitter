@@ -23,6 +23,7 @@ $| = 1;
 my $confbase = File::Basename::dirname(__FILE__) . '/../config/';
 my $OAuth    = do File::Spec->catfile($confbase, 'oauth.pl')  or die $!;
 my $secret   = do File::Spec->catfile($confbase, 'secret.pl') or die $!;
+my $ignore   = do File::Spec->catfile($confbase, 'ignore.pl') or die $!;
 
 my $recursive = HTML::Entities::Recursive->new;
 my $ua        = AnyEvent::Twitter->new(%$OAuth);
@@ -56,6 +57,10 @@ sub on_tweet {
 
     return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit)/;
     return if $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i;
+
+    for my $screen_name (@$ignore) {
+        return if $screen_name eq $tweet->{user}{screen_name};
+    }
 
     my $escaped = $recursive->encode_numeric($tweet);
     $escaped->{processed} = Text::Twitter::process($tweet);
