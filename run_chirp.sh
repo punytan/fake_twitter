@@ -1,4 +1,4 @@
 #!/bin/sh
 
-perl bin/chirp.pl > log/chirp 2>&1 &
+perl bin/chirp.pl > log/chirp.std 2> log/chirp.err &
 

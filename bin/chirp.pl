@@ -29,17 +29,17 @@ my $ua        = AnyEvent::Twitter->new(%$OAuth);
 my $client    = Tatsumaki::HTTPClient->new;
 
 while (1) {
-    logging("IMPORTANT: wake up");
+    warn now() . "ALERT: wake up";
     my $cv = AE::cv;
     my $listener = AnyEvent::Twitter::Stream->new(
-        consumer_key    => $OAuth->{consumer_key},
-        consumer_secret => $OAuth->{consumer_secret},
-        token           => $OAuth->{access_token},
-        token_secret    => $OAuth->{access_token_secret},
-        method          => 'userstream',
-        timeout         => 45,
-        on_tweet        => \&on_tweet,
-        on_error        => sub { logging("IMPORTANT: on error"); $cv->send; },
+        %$OAuth,
+        method   => 'userstream',
+        timeout  => 45,
+        on_tweet => \&on_tweet,
+        on_error => sub {
+            warn now() . "ALERT: on error";
+            $cv->send;
+        },
     );
     $cv->recv;
 }
@@ -66,14 +66,13 @@ sub on_tweet {
     my $tweet_text = JSON::to_json($escaped);
     $client->post("http://localhost:2222/new", [
         tweet => $tweet_text, secret => $secret
-    ], sub { logging($tweet->{text}); });
+    ], sub {
+        $tweet->{text} =~ s/\r|\n//g;
+        print encode_utf8 "<$tweet->{user}{screen_name}> $tweet->{text}\n\n";
+    });
 }
 
-sub logging {
-    for (@_) {
-        say sprintf "[%s] %s", scalar localtime, $_;
-    }
-}
+sub now { "[" .  scalar localtime . "] " }
 
 __END__
 
