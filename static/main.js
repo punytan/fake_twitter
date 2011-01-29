@@ -23,7 +23,7 @@ function load(v) {
 
                 $("div#" + id).append(
                     $('<div>').append(
-                        $('<img>').attr({src: r[i].user.profile_image_url}).addClass('icon'),
+                        $('<img>').attr({src: "http://api.linknode.net/twitter_thumbnail?url=" + r[i].user.profile_image_url}).addClass('icon'),
                         $('<div>').append("(", r[i].user.friends_count, "/", r[i].user.followers_count, ")")
                     ).addClass('iconarea')
                 );
@@ -111,7 +111,7 @@ function load_reply(id, target) {
                 if ($('div#' + target).val() != '') return;
                 $('div#' + target).append(
                     $('<div>').append(
-                        $('<img>').attr({src: r[1].user.profile_image_url}).addClass('icon')).addClass('iconarea'),
+                        $('<img>').attr({src: "http://api.linknode.net/twitter_thumbnail?url=" + r[1].user.profile_image_url}).addClass('icon')).addClass('iconarea'),
                     $('<div>').append(
                         $('<span>').append(r[1].text)).addClass('tweetholder'),
                     $('<div>').addClass('clear')
