@@ -187,7 +187,7 @@ sub post {
         $main::Filter->{$screen_name} = $filter;
 
         try {
-            open my $fh, '>', $main::confbase . "filter.pl" or die $!;
+            open my $fh, '>', "$main::confbase/filter.pl" or die $!;
             print $fh Data::Dumper::Dumper($main::Filter);
             close $fh;
 
