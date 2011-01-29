@@ -1,11 +1,13 @@
 * {
     margin  : 0px;
     padding : 0px;
-    font-size : 0.9em;
+    /* font-size : 0.9em; */
+    font-family:"Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
 html, body {
     height : 100%;
+    font-size : 0.9em;
 }
 
 body {
