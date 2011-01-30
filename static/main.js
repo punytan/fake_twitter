@@ -61,6 +61,8 @@ function load(v) {
                             {id:target}).addClass(target));
                     load_reply(r[i].in_reply_to_status_id, target);
                 }
+
+                expand_url(id);
             }
 
             if (r.length == 0) $("div#timeline").append($('<div>').append("no item"));
@@ -116,6 +118,28 @@ function load_reply(id, target) {
                         $('<span>').append(r[1].text)).addClass('tweetholder'),
                     $('<div>').addClass('clear')
                 );
+            }
+        });
+    });
+}
+
+function expand_url(id) {
+    $('div#' + id + ' > div.tweetholder > span:nth-child(2) > a').append(function () {
+        if ( /twitter\.com\/|tvtwi\.com|frepan\.org|nico\.ms\/lv/.test(this) ) return;
+        $.ajax({
+            url: 'http://api.linknode.net/urlresolver?url=' + this,
+            success: function (data) {
+                var info;
+                switch (data.status) {
+                    case 'not_html' :
+                        info = data.content_type; break;
+                    case 'ok' :
+                        info = data.title; break;
+                    default :
+                        info = 'Error'; break;
+                }
+                $('div#' + id + ' > div.tweetholder').append(
+                    $('<div>').append( data.title, ' - ', $('<a>').attr({href: data.url, target: '_blank'}).append(data.url) ).addClass('expanded_url'));
             }
         });
     });

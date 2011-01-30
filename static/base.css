@@ -82,6 +82,16 @@ div#timeline div.tweetholder span {
     margin : 5px;
 }
 
+div#timeline div.tweetholder div.expanded_url {
+    padding : 10px;
+    margin-left : 10%;
+    margin-right : 10%;
+    text-align : right;
+    border-bottom  : 1px dotted #ccc;
+    background-color : #F6F9ED;
+    opacity : 0.7;
+}
+
 div#timeline div.via {
     margin : 5px;
     text-align : right;
