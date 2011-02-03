@@ -49,7 +49,10 @@ sub on_tweet {
     return if $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i;
 
     for my $screen_name (@$ignore) {
-        return if $screen_name eq $tweet->{user}{screen_name};
+        if ($screen_name eq $tweet->{user}{screen_name}) {
+            print encode_utf8 "<$tweet->{user}{screen_name}> $tweet->{text}\n\n";
+            return;
+        }
     }
 
     my $escaped = $recursive->encode_numeric($tweet);
