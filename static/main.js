@@ -125,7 +125,7 @@ function load_reply(id, target) {
 
 function expand_url(id) {
     $('div#' + id + ' > div.tweetholder > span:nth-child(2) > a').append(function () {
-        if ( /twitter\.com\/|tvtwi\.com|frepan\.org|nico\.ms\/lv/.test(this) ) return;
+        if ( /twitter\.com\/|tvtwi\.com|frepan\.org|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\//.test(this) ) return;
         $.ajax({
             url: 'http://api.linknode.net/urlresolver?url=' + this,
             success: function (data) {
@@ -139,7 +139,7 @@ function expand_url(id) {
                         info = 'Error'; break;
                 }
                 $('div#' + id + ' > div.tweetholder').append(
-                    $('<div>').append( data.title, ' - ', $('<a>').attr({href: data.url, target: '_blank'}).append(data.url) ).addClass('expanded_url'));
+                    $('<div>').append( info, ' - ', $('<a>').attr({href: data.url, target: '_blank'}).append(data.url) ).addClass('expanded_url'));
             }
         });
     });
