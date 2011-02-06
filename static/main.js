@@ -95,10 +95,13 @@ function load_unread() {
     });
 }
 
-function statuses_update(status) {
+function statuses_update(status, in_reply_to_status_id) {
+    var parameters = { status : status };
+    if (in_reply_to_status_id) parameters["in_reply_to_status_id"] = in_reply_to_status_id;
+
     $.ajax({
         url: '/twitter/statuses/update',
-        data : { status : status },
+        data : parameters,
         type: 'post',
         dataType: 'json',
         success: function (r) {
@@ -239,6 +242,7 @@ $(function () {
         var text        = $('div#' + id + ' > .tweetholder > span:last').text();
         var new_text    = '@' + screen_name + ' ';
 
+        $('form#statuses_update').removeClass().addClass(id);
         $('textarea').val(new_text); $('textarea').focus();
     });
 
@@ -260,8 +264,11 @@ $(function () {
             OKButton: {
                 text: 'Yes',
                 callback: function () {
-                    statuses_update( $('#statuses_update textarea[name="status"]').val() );
-                    $('#statuses_update textarea[name="status"]').val('')
+                    var status = $('#statuses_update textarea[name="status"]').val();
+                    var in_reply_to_status_id = $('form#statuses_update').attr('class');
+                    statuses_update( status, in_reply_to_status_id ? in_reply_to_status_id : undefined );
+                    $('#statuses_update textarea[name="status"]').val('');
+                    $('form#statuses_update').removeClass();
                 }
             }
         });
