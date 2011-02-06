@@ -1,73 +1,79 @@
 var can_load_next = true;
+var is_loading = false;
 
 function load(v) {
     var filter = v ? v : 'timeline';
-    $.ajax({
-        url: "/api/tweet/show/" + filter,
-        data: {},
-        type: 'get',
-        dataType: 'json',
-        success: function (r) {
-            $('div#timeline').append(
-                $('<div>').append(filter).addClass('fn'));
+    if ( !is_loading ) {
+        is_loading = true;
+        $.ajax({
+            url: "/api/tweet/show/" + filter,
+            data: {},
+            type: 'get',
+            dataType: 'json',
+            success: function (r) {
+                $('div#timeline').append(
+                    $('<div>').append(filter).addClass('fn'));
 
-            var twbase = 'http://twitter.com/';
-            //console.log(r);
-            for (var i in r) {
-                var id = r[i].id;
+                var twbase = 'http://twitter.com/';
+                //console.log(r);
+                for (var i in r) {
+                    var id = r[i].id;
 
-                $("div#timeline").append( $('<div>').attr({id:id}) );
+                    $("div#timeline").append( $('<div>').attr({id:id}) );
 
-                if (r[i].retweeted_status != undefined) $("div#" + id).css("background-color", "#ffc");
-                if (/pun[y|i]tan/.test(r[i]["processed"])) $("div#" + id).css("background-color", "pink");
+                    if (r[i].retweeted_status != undefined) $("div#" + id).css("background-color", "#ffc");
+                    if (/pun[y|i]tan/.test(r[i]["processed"])) $("div#" + id).css("background-color", "pink");
 
-                $("div#" + id).append(
-                    $('<div>').append(
-                        $('<img>').attr({src: "http://api.linknode.net/twitter_thumbnail?url=" + r[i].user.profile_image_url}).addClass('icon'),
-                        $('<div>').append("(", r[i].user.friends_count, "/", r[i].user.followers_count, ")")
-                    ).addClass('iconarea')
-                );
+                    $("div#" + id).append(
+                        $('<div>').append(
+                            $('<img>').attr({src: "http://api.linknode.net/twitter_thumbnail?url=" + r[i].user.profile_image_url}).addClass('icon'),
+                            $('<div>').append("(", r[i].user.friends_count, "/", r[i].user.followers_count, ")")
+                        ).addClass('iconarea')
+                    );
 
-                $("div#" + id).append(
-                    $('<div>').append(
-                        $('<span>').append(
-                            $('<a>').append(r[i].user.screen_name).attr(
-                                {href: twbase + r[i].user.screen_name, 'target': '_blank'})),
-                        $('<span>').append(r[i].processed)
-                    ).addClass('tweetholder')
-                );
+                    $("div#" + id).append(
+                        $('<div>').append(
+                            $('<span>').append(
+                                $('<a>').append(r[i].user.screen_name).attr(
+                                    {href: twbase + r[i].user.screen_name, 'target': '_blank'})),
+                            $('<span>').append(r[i].processed)
+                        ).addClass('tweetholder')
+                    );
 
-                $("div#" + id).append( $('<div>').addClass('via') );
+                    $("div#" + id).append( $('<div>').addClass('via') );
 
-                $("div#" + id + " > div.via").append(
-                    $('<span>').append('RT').addClass('rt'),                      $('<span>').append(' / '),
-                    $('<span>').append('Unofficial RT').addClass('unofficialrt'), $('<span>').append(' / '),
-                    $('<span>').append('Reply').addClass('reply'),                $('<span>').append(' / '),
-                    $('<span>').append('Fav').addClass('fav'),                    $('<span>').append(' / '),
+                    $("div#" + id + " > div.via").append(
+                        $('<span>').append('RT').addClass('rt'),                      $('<span>').append(' / '),
+                        $('<span>').append('Unofficial RT').addClass('unofficialrt'), $('<span>').append(' / '),
+                        $('<span>').append('Reply').addClass('reply'),                $('<span>').append(' / '),
+                        $('<span>').append('Fav').addClass('fav'),                    $('<span>').append(' / '),
 
-                    $('<a>').append(r[i].created_at).attr(
-                        {href: twbase + r[i].user.screen_name + "/status/" + r[i].id, 'target': '_blank'}),
-                    $('<span>').append(' / '),
+                        $('<a>').append(r[i].created_at).attr(
+                            {href: twbase + r[i].user.screen_name + "/status/" + r[i].id, 'target': '_blank'}),
+                        $('<span>').append(' / '),
 
-                    $('<span>').append(r[i].source)
-                );
+                        $('<span>').append(r[i].source)
+                    );
 
-                $("div#" + id).append( $('<div>').addClass('clear') );
+                    $("div#" + id).append( $('<div>').addClass('clear') );
 
-                if (r[i].in_reply_to_status_id) {
-                    var target = r[i].in_reply_to_status_id + Math.floor(Math.random() * 10000);
-                    $("div#timeline").append(
-                        $('<div>').addClass('in_reply_to_status_id').attr(
-                            {id:target}).addClass(target));
-                    load_reply(r[i].in_reply_to_status_id, target);
+                    if (r[i].in_reply_to_status_id) {
+                        var target = r[i].in_reply_to_status_id + Math.floor(Math.random() * 10000);
+                        $("div#timeline").append(
+                            $('<div>').addClass('in_reply_to_status_id').attr(
+                                {id:target}).addClass(target));
+                        load_reply(r[i].in_reply_to_status_id, target);
+                    }
+
+                    expand_url(id);
                 }
 
-                expand_url(id);
-            }
-
-            if (r.length == 0) $("div#timeline").append($('<div>').append("no item"));
-        }
-    });
+                if (r.length == 0) $("div#timeline").append($('<div>').append("no item"));
+                is_loading = false;
+            },
+            error: function () { is_loading = false; }
+        });
+    }
     load_unread();
 }
 
