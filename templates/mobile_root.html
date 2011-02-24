@@ -3,27 +3,26 @@
 <head>
     <meta charset="UTF-8" />
     <title>MobileRoot</title>
+    <meta name="viewport" content="initial-scale = 1.0,maximum-scale = 1.0" />
 </head>
 <body>
-
 : for $list -> $item {
-    <table <: if ($item.retweeted_status) { :> bgcolor="#FFF8DC" <: } :>>
-        <tr>
-            <td>
+
+    <div style="
+        <: if ($item.retweeted_status) { :> background-color:#FFF8DC; <: } :>
+    ">
+            <div>
                 <img src="http://api.linknode.net/twitter_thumbnail?url=<: $item.user.profile_image_url :>" with="16px" height="16px" />
                 <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
-            </td>
-        </tr>
+            </div>
 
-        <tr>
-            <td><blockquote><: $item.processed | mark_raw :></blockquote></td>
-        </tr>
+            <div><blockquote><: $item.processed | mark_raw :></blockquote></div>
 
-        <tr>
-            <td align="right"><: $item.created_at :></td>
-        </tr>
-    </table>
+            <div style="text-align:right;"><: $item.created_at :></div>
+        </div>
+
     <hr />
+
 : }
 
 : if $list.size() == 0 {
@@ -36,7 +35,7 @@
 :   if $unread[$key] == 0 {
 :       # skip
 :   } else {
-        <li><a href="/mobile?guid=on&filter=<: $key :>"><: $key :></a>(<: $unread[$key] :>)</li>
+        <li><a href="/mobile?filter=<: $key :>"><: $key :></a>(<: $unread[$key] :>)</li>
 :   }
 : }
 </ul>

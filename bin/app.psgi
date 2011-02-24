@@ -9,7 +9,6 @@ $main::confbase = File::Basename::dirname(__FILE__) . '/../config';
 $main::Tweets = {};
 $main::Filter = do "$main::confbase/filter.pl" or die $!;
 $main::OAuth  = do "$main::confbase/oauth.pl"  or die $!;
-$main::guid   = do "$main::confbase/guid.pl"   or die $!;
 $main::phrase = do "$main::confbase/phrase.pl" or die $!;
 $main::secret = do "$main::confbase/secret.pl" or die $!;
 
@@ -50,7 +49,12 @@ sub post {
     if ($self->request->param('phrase') eq $main::phrase) {
         $self->request->session->{verified} = 1;
         $self->request->session_options->{change_id}++;
-        $self->response->redirect('/');
+
+        if ($self->request->user_agent =~ /iPhone/) {
+            $self->response->redirect('/mobile');
+        } else {
+            $self->response->redirect('/');
+        }
     } else {
         $self->render('login.html', {});
     }
@@ -290,18 +294,18 @@ my $xslate = Text::Xslate->new(
 sub get {
     my $self = shift;
 
-    if ($self->request->env->{'HTTP_X_DCMGUID'} ne $main::guid) {
-        $self->response->redirect('/');
+    unless ($self->request->session->{verified}) {
+        $self->render('login.html', {});
+        $self->finish;
     }
 
     my $filter = $self->request->param('filter');
     $filter ||= 'timeline';
 
     my @v;
-    while (@{$main::Tweets->{$filter}}) {
+    while (@{$main::Tweets->{$filter} || []}) {
         last if 20 <= scalar @v;
         my $item = shift @{$main::Tweets->{$filter}};
-        #$item->{processed} =~ s{http://}{http://mobazilla.jp/index.php?}g;
         push @v, $item;
     }
 
@@ -311,7 +315,6 @@ sub get {
     }
 
     my $body = $xslate->render('mobile_root.html', {unread => $unread, list => \@v});
-    #$self->render('mobile_root.html', {unread => $unread, list => \@v});
 
     $self->response->content_type('text/html');
     $self->finish(Encode::encode_utf8($body));
@@ -323,7 +326,6 @@ use Plack::Builder;
 use Plack::Middleware::Session;
 use Plack::Session::Store::File;
 use Plack::Session::State::Cookie;
-use Plack::Middleware::DoCoMoGUID;
 use Tatsumaki::Application;
 
 my $app = Tatsumaki::Application->new([
@@ -353,12 +355,6 @@ my $on_tweet = Tatsumaki::Application->new([
 
 builder {
     enable 'Lint';
-    #enable 'Debug';
-
-    mount '/mobile' => builder {
-        $mobile;
-    };
-
     mount '/new' => $on_tweet;
 
     mount '/' => builder {
@@ -369,7 +365,8 @@ builder {
             state => Plack::Session::State::Cookie->new(
                 session_key => 'uid',
             );
-        $app;
+        mount '/mobile' => $mobile;
+        mount '/'       => $app;
     };
 }
 
