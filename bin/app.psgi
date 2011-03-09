@@ -249,7 +249,9 @@ sub post {
     }
 
     if (my $filter = $main::Filter->{$tweet->{user}{screen_name}}) {
-        push @{$main::Tweets->{$filter}}, $tweet;
+        if ($filter ne 'ignore') {
+            push @{$main::Tweets->{$filter}}, $tweet;
+        }
     } else {
         push @{$main::Tweets->{timeline}}, $tweet;
     }

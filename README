@@ -2,8 +2,6 @@ Create following files. See also config_sample/
 
 config/
 |-- filter.pl
-|-- guid.pl
-|-- ignore.pl
 |-- oauth.pl
 |-- phrase.pl
 `-- secret.pl

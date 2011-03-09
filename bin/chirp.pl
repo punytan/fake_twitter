@@ -1,20 +1,18 @@
 use practical;
 use Encode;
 use JSON;
-use File::Basename;
 use HTML::Entities::Recursive;
 use Tatsumaki::HTTPClient;
 use AnyEvent::Twitter::Stream;
 
-use lib File::Basename::dirname(__FILE__) . '/../lib/';
+use lib 'lib';
 use Text::Twitter;
 
 $| = 1;
 
-my $confbase = File::Basename::dirname(__FILE__) . '/../config';
+my $confbase = 'config';
 my $OAuth    = do "$confbase/oauth.pl"  or die $!;
 my $secret   = do "$confbase/secret.pl" or die $!;
-my $ignore   = do "$confbase/ignore.pl" or die $!;
 
 my $recursive = HTML::Entities::Recursive->new;
 my $client    = Tatsumaki::HTTPClient->new;
@@ -47,13 +45,6 @@ sub on_tweet {
 
     return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit)/;
     return if $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i;
-
-    for my $screen_name (@$ignore) {
-        if ($screen_name eq $tweet->{user}{screen_name}) {
-            print encode_utf8 "<$tweet->{user}{screen_name}> $tweet->{text}\n\n";
-            return;
-        }
-    }
 
     my $escaped = $recursive->encode_numeric($tweet);
     $escaped->{processed} = Text::Twitter::process($tweet);
