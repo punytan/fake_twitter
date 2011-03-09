@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>MobileRoot</title>
     <meta name="viewport" content="initial-scale = 1.0,maximum-scale = 1.0" />
+    <style>img { width : 150; height : 150px; }</style>
 </head>
 <body>
 : for $list -> $item {
@@ -12,7 +13,7 @@
         <: if ($item.retweeted_status) { :> background-color:#FFF8DC; <: } :>
     ">
             <div>
-                <img src="http://api.linknode.net/twitter_thumbnail?url=<: $item.user.profile_image_url :>" with="16px" height="16px" />
+                <img src="<: $item.user.profile_image_url :>" style="width : 32px; height : 32px;" />
                 <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
             </div>
 
