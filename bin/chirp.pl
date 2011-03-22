@@ -43,7 +43,7 @@ sub on_tweet {
         $tweet->{source} = $1;
     }
 
-    return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit)/;
+    return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit|Hatena)/;
     return if $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i;
     return if $tweet->{text} =~ /(?:[RＲ][TＴ]|拡散)(?:希望|お?願い|して|よろしく)|\@ikedanob/i;
     return if $tweet->{text} =~ /[公式]?(?:リ?ツイート|[Q|R]T)された回?数.+(?:する|します)/i;
