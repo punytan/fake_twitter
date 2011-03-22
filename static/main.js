@@ -134,7 +134,7 @@ function load_reply(id, target) {
 
 function expand_url(id) {
     $('div#' + id + ' > div.tweetholder > span:nth-child(2) > a').append(function () {
-        if ( /twitter\.com\/|tvtwi\.com|buzztter.com\/|frepan\.org|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\//.test(this) ) return;
+        if ( /twitter\.com\/|tvtwi\.com|buzztter.com\/|frepan\.org|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\/|nhk\.jp\/|bit\.ly\/17n4iz/.test(this) ) return;
         $.ajax({
             url: 'http://api.linknode.net/urlresolver?url=' + this,
             success: function (data) {
