@@ -4,14 +4,37 @@
     <meta charset="UTF-8" />
     <title>MobileRoot</title>
     <meta name="viewport" content="initial-scale = 1.0,maximum-scale = 1.0" />
-    <style>img { width : 150; height : 150px; }</style>
+    <link rel="stylesheet" type="text/css" href="/static/base.css" />
+    <style>
+        * {
+            -webkit-text-size-adjust : none;
+        }
+        img {
+            width : 150;
+            height : 150px;
+        }
+        .retweet {
+            background-color : #FFF8DC;
+        }
+        ul.unread { }
+        ul.unread > li {
+            padding-left : 5%;
+            padding-top : 3%;
+        }
+        ul.unread > li > a {
+            width : 100%;
+        }
+
+    </style>
 </head>
 <body>
 : for $list -> $item {
 
-    <div style="
-        <: if ($item.retweeted_status) { :> background-color:#FFF8DC; <: } :>
-    ">
+    : if ($item.retweeted_status) {
+        <div class="retweet">
+    : } else {
+        <div>
+    : }
             <div>
                 <img src="<: $item.user.profile_image_url :>" style="width : 32px; height : 32px;" />
                 <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
@@ -31,16 +54,15 @@
     <hr />
 : }
 
-<ul>
+<div>
+<ul class="unread">
 : for $unread.keys() -> $key {
-:   if $unread[$key] == 0 {
-:       # skip
-:   } else {
+:   if $unread[$key] > 0 {
         <li><a href="/mobile?filter=<: $key :>"><: $key :></a>(<: $unread[$key] :>)</li>
 :   }
 : }
 </ul>
-
+</div>
 <hr />
 
 </body>
