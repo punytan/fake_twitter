@@ -104,8 +104,7 @@ sub get {
         $opts{$key} = Encode::decode_utf8($requested_opts->{$key});
     }
 
-    $ua->request(method => 'GET', api => $api,
-        params => {%opts}, sub { $self->on_response(@_); });
+    $ua->get($api, {%opts}, sub { $self->on_response(@_); });
 }
 
 sub post {
@@ -124,8 +123,7 @@ sub post {
         $opts{$key} = Encode::decode_utf8($requested_opts->{$key});
     }
 
-    $ua->request(method => 'POST', api => $api,
-        params => {%opts}, sub { $self->on_response(@_); });
+    $ua->post($api, {%opts}, sub { $self->on_response(@_); });
 }
 
 sub on_response {
