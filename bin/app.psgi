@@ -332,7 +332,7 @@ use Tatsumaki::Application;
 
 my $app = Tatsumaki::Application->new([
     '/twitter/([a-zA-z0-9_/]+)' => 'Twitter',
-    '/api/tweet/show/([\w\-]+)' => 'API::Tweet::Show',
+    '/api/tweet/show/(.+)' => 'API::Tweet::Show',
     '/api/filter/unread' => 'API::Filter::Unread',
     '/api/filter' => 'API::Filter',
     '/settings' => 'Settings',
