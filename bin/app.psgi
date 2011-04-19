@@ -97,7 +97,7 @@ sub get {
         $self->finish;
     }
 
-    my $requested_opts = $self->request->parameters;
+    my $requested_opts = $self->request->parameters->as_hashref;
 
     my %opts;
     for my $key (keys %$requested_opts) {
@@ -117,7 +117,7 @@ sub post {
         $self->finish;
     }
 
-    my $requested_opts = $self->request->parameters;
+    my $requested_opts = $self->request->parameters->as_hashref;
 
     my %opts;
     for my $key (keys %$requested_opts) {
