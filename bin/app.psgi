@@ -16,7 +16,7 @@ package Logout;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
 
-sub get {
+sub post {
     my $self = shift;
 
     if ($self->request->session->{verified}) {
