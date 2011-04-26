@@ -90,6 +90,7 @@ div#timeline div.tweetholder div.expanded_url {
     border-bottom  : 1px dotted #ccc;
     background-color : #F6F9ED;
     opacity : 0.7;
+    word-break : break-all;
 }
 
 div#timeline div.via {

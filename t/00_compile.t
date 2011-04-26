@@ -1,4 +1,7 @@
 use strict;
-use Test::More tests => 1;
+use Test::More;
 
-BEGIN { use_ok 'Text::Twitter' }
+BEGIN {
+    use_ok 'App::FakeTwitter';
+    use_ok 'App::FakeTwitter::Util';
+}

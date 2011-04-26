@@ -1,4 +1,4 @@
-package Text::Twitter;
+package App::FakeTwitter::Util;
 use strict;
 use warnings;
 our $VERSION = '0.01';
@@ -36,7 +36,14 @@ our %basic = (
     community => q{<img src="http://icon.nimg.jp/community/s/%s.jpg" class="thumb_mini" />},
 );
 
+sub new {
+    my $class = shift;
+
+    return bless {}, $class;
+}
+
 sub process {
+    my $self  = shift;
     my $tweet = shift;
 
     my $text  = defined $tweet->{retweeted_status}{text}

@@ -1,16 +1,12 @@
 use practical;
-use File::Basename;
+use FindBin;
 use Data::Dumper;
 use JSON;
 use Encode;
 
-$main::confbase = File::Basename::dirname(__FILE__) . '/../config';
-
+our $Bin = $FindBin::Bin;
 $main::Tweets = {};
-$main::Filter = do "$main::confbase/filter.pl" or die $!;
-$main::OAuth  = do "$main::confbase/oauth.pl"  or die $!;
-$main::phrase = do "$main::confbase/phrase.pl" or die $!;
-$main::secret = do "$main::confbase/secret.pl" or die $!;
+$main::Filter = do "$Bin/../config/filter.pl" or die $!;
 
 package Logout;
 use parent 'Tatsumaki::Handler';
@@ -22,7 +18,6 @@ sub post {
     if ($self->request->session->{verified}) {
         $self->request->session_options->{expire}++;
     }
-
     $self->response->redirect('/');
     $self->finish;
 }
@@ -30,23 +25,23 @@ sub post {
 package Login;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
+my $phrase = do "$Bin/../config/phrase.pl" or die $!;
 
 sub get {
     my $self = shift;
 
     if ($self->request->session->{verified}) {
         $self->response->redirect('/');
+        $self->finish;
     } else {
         $self->render('login.html', {});
     }
-
-    $self->finish;
 }
 
 sub post {
     my $self = shift;
 
-    if ($self->request->param('phrase') eq $main::phrase) {
+    if ($self->request->param('phrase') eq $phrase) {
         $self->request->session->{verified} = 1;
         $self->request->session_options->{change_id}++;
 
@@ -55,11 +50,10 @@ sub post {
         } else {
             $self->response->redirect('/');
         }
+        $self->finish;
     } else {
         $self->render('login.html', {});
     }
-
-    $self->finish;
 }
 
 package Root;
@@ -69,61 +63,59 @@ __PACKAGE__->asynchronous(1);
 sub get {
     my $self = shift;
 
-    unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+    if ($self->request->session->{verified}) {
+        $self->render('root.html');
+    } else {
+        $self->render('login.html');
     }
-
-    $self->render('root.html', {});
-    $self->finish;
 }
 
 package Twitter;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use Try::Tiny;
 use AnyEvent::Twitter;
 use HTML::Entities::Recursive;
 
-my $ua = AnyEvent::Twitter->new(%$main::OAuth);
+my $OAuth = do "$Bin/../config/oauth.pl" or die $!;
+
+my $ua = AnyEvent::Twitter->new(%$OAuth);
 my $recursive = HTML::Entities::Recursive->new;
 
 sub get {
-    my $self = shift;
-    my $api  = shift;
+    my ($self, $api) = @_;
 
     unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+        $self->render('login.html');
     }
-
-    my $requested_opts = $self->request->parameters->as_hashref;
-
-    my %opts;
-    for my $key (keys %$requested_opts) {
-        $opts{$key} = Encode::decode_utf8($requested_opts->{$key});
-    }
-
-    $ua->get($api, {%opts}, sub { $self->on_response(@_); });
+    $self->do($api, 'GET');
 }
 
 sub post {
-    my $self = shift;
-    my $api  = shift;
+    my ($self, $api) = @_;
 
     unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+        $self->render('login.html');
     }
+    $self->do($api, 'POST');
+}
 
-    my $requested_opts = $self->request->parameters->as_hashref;
+sub do {
+    my ($self, $api, $method) = @_;
+    my $req_opts = $self->request->parameters->as_hashref;
 
     my %opts;
-    for my $key (keys %$requested_opts) {
-        $opts{$key} = Encode::decode_utf8($requested_opts->{$key});
+    for my $key (keys %$req_opts) {
+        $opts{$key} = Encode::decode_utf8($req_opts->{$key});
     }
 
-    $ua->post($api, {%opts}, sub { $self->on_response(@_); });
+    $ua->request(
+        method => $method,
+        api    => $api,
+        params => {%opts},
+        $self->async_cb(sub {
+            $self->on_response(@_)
+        })
+    );
 }
 
 sub on_response {
@@ -147,12 +139,9 @@ sub get {
     my $self = shift;
 
     unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+        $self->render('login.html');
     }
-
-    $self->render('settings.html', {});
-    $self->finish;
+    $self->render('settings.html');
 }
 
 package API::Filter;
@@ -164,8 +153,7 @@ sub get {
     my $self = shift;
 
     unless ($self->request->env->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+        $self->render('login.html');
     }
 
     $self->response->content_type('application/json');
@@ -176,8 +164,7 @@ sub post {
     my $self = shift;
 
     unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+        $self->render('login.html');
     }
 
     $self->response->content_type('application/json');
@@ -189,33 +176,27 @@ sub post {
         $main::Filter->{$screen_name} = $filter;
 
         try {
-            open my $fh, '>', "$main::confbase/filter.pl" or die $!;
-            print $fh Data::Dumper::Dumper($main::Filter);
-            close $fh;
-
+            open my $fh, '>', "$Bin/../config/filter.pl" or die $!;
+            print {$fh} Data::Dumper::Dumper($main::Filter);
+            close $fh or die $!;
             $self->finish(JSON::encode_json({success => 1}));
-
         } catch {
             $self->finish(JSON::encode_json({success => 0}));
         }
-
     } else {
         $self->finish(JSON::encode_json({success => 0}));
     }
-
 }
 
 package API::Filter::Unread;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
-use Try::Tiny;
 
 sub get {
     my $self = shift;
 
     unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+        $self->render('login.html');
     }
 
     my $rv = {};
@@ -232,19 +213,20 @@ use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
 use Try::Tiny;
 
+my $secret = do "$Bin/../config/secret.pl" or die $!;
+
 sub post {
     my $self = shift;
 
-    if ($self->request->param('secret') ne $main::secret) {
+    if ($self->request->param('secret') ne $secret) {
         $self->finish("ERROR");
     }
 
     my $tweet = try {
-        JSON::decode_json($self->request->param('tweet')) } catch { undef };
+        JSON::decode_json($self->request->param('tweet'))
+    } catch { undef };
 
-    unless ($tweet) {
-        $self->finish("ERROR");
-    }
+    $self->finish("ERROR") unless $tweet;
 
     if (my $filter = $main::Filter->{$tweet->{user}{screen_name}}) {
         if ($filter ne 'ignore') {
@@ -253,7 +235,6 @@ sub post {
     } else {
         push @{$main::Tweets->{timeline}}, $tweet;
     }
-
     $self->finish("OK");
 }
 
@@ -265,15 +246,14 @@ sub get {
     my ($self, $filter) = @_;
 
     unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
-        $self->finish;
+        $self->render('login.html');
     }
 
     $filter ||= 'timeline';
 
     my @v;
     while (@{$main::Tweets->{$filter}}) {
-        last if 20 <= scalar @v;
+        last if 25 <= scalar @v;
         push @v, shift @{$main::Tweets->{$filter}};
     }
 
@@ -287,8 +267,8 @@ __PACKAGE__->asynchronous(1);
 use Text::Xslate;
 
 my $xslate = Text::Xslate->new(
-    path      => [File::Basename::dirname(__FILE__) . "/../templates"],
-    cache_dir => File::Spec->tmpdir,
+    path      => ["$Bin/../templates"],
+    cache_dir => '/tmp',
 );
 
 sub get {
@@ -296,7 +276,6 @@ sub get {
 
     unless ($self->request->session->{verified}) {
         $self->render('login.html', {});
-        $self->finish;
     }
 
     my $filter = $self->request->param('filter');
@@ -304,7 +283,7 @@ sub get {
 
     my @v;
     while (@{$main::Tweets->{$filter} || []}) {
-        last if 20 <= scalar @v;
+        last if 25 <= scalar @v;
         my $item = shift @{$main::Tweets->{$filter}};
         push @v, $item;
     }
@@ -314,7 +293,8 @@ sub get {
         $unread->{$name} = scalar @{$main::Tweets->{$name}};
     }
 
-    my $body = $xslate->render('mobile_root.html', {unread => $unread, list => \@v});
+    my $body = $xslate->render('mobile_root.html',
+        {unread => $unread, list => \@v});
 
     $self->response->content_type('text/html');
     $self->finish(Encode::encode_utf8($body));
@@ -328,6 +308,9 @@ use Plack::Session::Store::File;
 use Plack::Session::State::Cookie;
 use Tatsumaki::Application;
 
+my $tpath = "$Bin/../templates";
+my $spath = "$Bin/../static";
+
 my $app = Tatsumaki::Application->new([
     '/twitter/([a-zA-z0-9_/]+)' => 'Twitter',
     '/api/tweet/show/(.+)' => 'API::Tweet::Show',
@@ -338,35 +321,28 @@ my $app = Tatsumaki::Application->new([
     '/login' => 'Login',
     '/' => 'Root',
 ]);
+$app->template_path($tpath);
+$app->static_path($spath);
 
-$app->template_path(File::Basename::dirname(__FILE__) . "/../templates");
-$app->static_path(File::Basename::dirname(__FILE__) . "/../static");
+my $mobile = Tatsumaki::Application->new([ '' => 'Mobile::Root' ]);
+$mobile->template_path($tpath);
+$mobile->static_path($spath);
 
-my $mobile = Tatsumaki::Application->new([
-    '' => 'Mobile::Root',
-]);
-
-$mobile->template_path(File::Basename::dirname(__FILE__) . "/../templates");
-$mobile->static_path(File::Basename::dirname(__FILE__) . "/../static");
-
-my $on_tweet = Tatsumaki::Application->new([
-    '' => 'New',
-]);
+my $on_tweet = Tatsumaki::Application->new([ '' => 'New' ]);
 
 builder {
-    enable 'Lint';
-    mount '/new' => $on_tweet;
+    mount '/new' => builder { $on_tweet; };
 
     mount '/' => builder {
         enable 'Session',
             store => Plack::Session::Store::File->new(
-                dir => File::Basename::dirname(__FILE__) . "/../sessions"
+                dir => "$Bin/../sessions"
             ),
             state => Plack::Session::State::Cookie->new(
                 session_key => 'uid',
             );
-        mount '/mobile' => $mobile;
-        mount '/'       => $app;
+        mount '/mobile' => builder { $mobile; };
+        mount '/'       => builder { $app; };
     };
 }
 
