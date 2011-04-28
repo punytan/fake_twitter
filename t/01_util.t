@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use App::FakeTwitter::Util;
 
-my $util = App::FakeTwitter::Util;
+my $util = App::FakeTwitter::Util->new;
 
 my $tweet = { text => 'foo' };
 ok $util->process($tweet) eq 'foo', 'basic tweet';
@@ -15,7 +15,7 @@ my $rt = {
     },
 };
 
-$util->process($rt)
+ok $util->process($rt)
     eq 'RT @<a href="http://twitter.com/bar" target="_blank">bar</a>: foo', 'basic RT';
 
 my $basic_url = { text => 'http://google.com' };
