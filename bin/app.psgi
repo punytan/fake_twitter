@@ -208,36 +208,6 @@ sub get {
     $self->finish(JSON::encode_json($rv));
 }
 
-package New;
-use parent 'Tatsumaki::Handler';
-__PACKAGE__->asynchronous(1);
-use Try::Tiny;
-
-my $secret = do "$Bin/../config/secret.pl" or die $!;
-
-sub post {
-    my $self = shift;
-
-    if ($self->request->param('secret') ne $secret) {
-        $self->finish("ERROR");
-    }
-
-    my $tweet = try {
-        JSON::decode_json($self->request->param('tweet'))
-    } catch { undef };
-
-    $self->finish("ERROR") unless $tweet;
-
-    if (my $filter = $main::Filter->{$tweet->{user}{screen_name}}) {
-        if ($filter ne 'ignore') {
-            push @{$main::Tweets->{$filter}}, $tweet;
-        }
-    } else {
-        push @{$main::Tweets->{timeline}}, $tweet;
-    }
-    $self->finish("OK");
-}
-
 package API::Tweet::Show;
 use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
@@ -252,7 +222,7 @@ sub get {
     $filter ||= 'timeline';
 
     my @v;
-    while (@{$main::Tweets->{$filter}}) {
+    while (@{$main::Tweets->{$filter} || []}) {
         last if 25 <= scalar @v;
         push @v, shift @{$main::Tweets->{$filter}};
     }
@@ -307,7 +277,14 @@ use Plack::Middleware::Session;
 use Plack::Session::Store::File;
 use Plack::Session::State::Cookie;
 use Tatsumaki::Application;
+use Twiggy::Server;
+use AnyEvent::Twitter::Stream;
+use HTML::Entities::Recursive;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use App::FakeTwitter::Util;
 
+my $oauth_token = do "$Bin/../config/oauth.pl" or die $!;
 my $tpath = "$Bin/../templates";
 my $spath = "$Bin/../static";
 
@@ -328,11 +305,7 @@ my $mobile = Tatsumaki::Application->new([ '' => 'Mobile::Root' ]);
 $mobile->template_path($tpath);
 $mobile->static_path($spath);
 
-my $on_tweet = Tatsumaki::Application->new([ '' => 'New' ]);
-
-builder {
-    mount '/new' => builder { $on_tweet; };
-
+my $mapp = builder {
     mount '/' => builder {
         enable 'Session',
             store => Plack::Session::Store::File->new(
@@ -344,7 +317,56 @@ builder {
         mount '/mobile' => builder { $mobile; };
         mount '/'       => builder { $app; };
     };
-}
+};
+
+my $server; $server = Twiggy::Server->new(
+    host => undef,
+    port => 10000,
+)->register_service($mapp);
+
+my ($STREAM_CONN, $listener);
+my $w; $w = AE::timer 1, 10, sub {
+    return if $STREAM_CONN;
+
+    say "ALERT: wake up";
+    $listener = AnyEvent::Twitter::Stream->new(
+        %$oauth_token,
+        method     => 'userstream',
+        on_error   => sub { $STREAM_CONN = 0; },
+        on_connect => sub { $STREAM_CONN = 1; },
+        on_tweet   => sub {
+            my $tweet = HTML::Entities::Recursive->new->decode(shift);
+
+            return unless $tweet->{text};
+
+            if ($tweet->{source} =~ />(.+)</) {
+                $tweet->{source} = $1;
+            }
+
+            return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit|Hatena)/i
+                or $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i
+                or $tweet->{text} =~ /(?:[RＲ][TＴ]|拡散)(?:希望|お?願い|して|よろしく)|\@ikedanob/i
+                or $tweet->{text} =~ /[公式]?(?:リ?ツイート|[Q|R]T)された回?数.+(?:する|します)/i
+                or $tweet->{text} =~ /(?:[RQ]T:? \@\w+.*){3,}/i;
+
+            my $escaped = HTML::Entities::Recursive->new->encode_numeric($tweet);
+            $escaped->{processed} = App::FakeTwitter::Util->new->process($tweet);
+            $escaped->{created_at} = scalar localtime;
+
+            return unless $escaped->{processed};
+
+            if (my $filter = $main::Filter->{$tweet->{user}{screen_name}}) {
+                push @{$main::Tweets->{$filter}}, $escaped unless $filter eq 'mute';
+            } else {
+                push @{$main::Tweets->{timeline}}, $escaped;
+            }
+
+            $STREAM_CONN = 1;
+        },
+    );
+};
+
+AE::cv->recv;
 
 __END__
 
