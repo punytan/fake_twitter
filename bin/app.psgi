@@ -306,17 +306,11 @@ $mobile->template_path($tpath);
 $mobile->static_path($spath);
 
 my $mapp = builder {
-    mount '/' => builder {
-        enable 'Session',
-            store => Plack::Session::Store::File->new(
-                dir => "$Bin/../sessions"
-            ),
-            state => Plack::Session::State::Cookie->new(
-                session_key => 'uid',
-            );
-        mount '/mobile' => builder { $mobile; };
-        mount '/'       => builder { $app; };
-    };
+    enable 'Session',
+        store => Plack::Session::Store::File->new( dir => "$Bin/../sessions" ),
+        state => Plack::Session::State::Cookie->new( session_key => 'uid' );
+    mount '/mobile' => $mobile;
+    mount '/'       => $app;
 };
 
 my $server; $server = Twiggy::Server->new(
