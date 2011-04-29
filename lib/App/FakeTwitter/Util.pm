@@ -116,6 +116,19 @@ sub process {
     return $html;
 }
 
+sub is_valid_tweet {
+    my ($self, $tweet) = @_;
+
+    use utf8;
+    return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit|Hatena)/i
+           or $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i
+           or $tweet->{text} =~ /(?:[RＲ][TＴ]|拡散)(?:希望|お?願い|して|よろしく)|\@ikedanob/i
+           or $tweet->{text} =~ /[公式]?(?:リ?ツイート|[Q|R]T)された回?数.+(?:する|します)/i
+           or $tweet->{text} =~ /(?:[RQ]T:? \@\w+.*){3,}/i;
+
+    return 1;
+}
+
 1;
 __END__
 

@@ -328,6 +328,9 @@ my ($STREAM_CONN, $listener);
 my $w; $w = AE::timer 1, 10, sub {
     return if $STREAM_CONN;
 
+    my $recursive = HTML::Entities::Recursive->new;
+    my $util = App::FakeTwitter::Util->new;
+
     say "ALERT: wake up";
     $listener = AnyEvent::Twitter::Stream->new(
         %$oauth_token,
@@ -335,25 +338,18 @@ my $w; $w = AE::timer 1, 10, sub {
         on_error   => sub { $STREAM_CONN = 0; },
         on_connect => sub { $STREAM_CONN = 1; },
         on_tweet   => sub {
-            my $tweet = HTML::Entities::Recursive->new->decode(shift);
+            my $tweet = $recursive->decode(shift);
 
-            return unless $tweet->{text};
+            return if not $tweet->{text}
+                   or not $util->is_valid_tweet($tweet);
 
             if ($tweet->{source} =~ />(.+)</) {
                 $tweet->{source} = $1;
             }
 
-            return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit|Hatena)/i
-                or $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i
-                or $tweet->{text} =~ /(?:[RＲ][TＴ]|拡散)(?:希望|お?願い|して|よろしく)|\@ikedanob/i
-                or $tweet->{text} =~ /[公式]?(?:リ?ツイート|[Q|R]T)された回?数.+(?:する|します)/i
-                or $tweet->{text} =~ /(?:[RQ]T:? \@\w+.*){3,}/i;
-
-            my $escaped = HTML::Entities::Recursive->new->encode_numeric($tweet);
-            $escaped->{processed} = App::FakeTwitter::Util->new->process($tweet);
+            my $escaped = $recursive->encode_numeric($tweet);
+            $escaped->{processed}  = $util->process($tweet);
             $escaped->{created_at} = scalar localtime;
-
-            return unless $escaped->{processed};
 
             if (my $filter = $main::Filter->{$tweet->{user}{screen_name}}) {
                 push @{$main::Tweets->{$filter}}, $escaped unless $filter eq 'mute';

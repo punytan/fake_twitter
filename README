@@ -3,11 +3,9 @@ Create following files. See also config_sample/
 config/
 |-- filter.pl
 |-- oauth.pl
-|-- phrase.pl
-`-- secret.pl
+`-- phrase.pl
 
 Then,
 
-$ ./run_server.sh
-$ ./run_chirp.sh
+$ twiggy bin/app.psgi
 
