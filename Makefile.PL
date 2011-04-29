@@ -1,6 +1,6 @@
 use inc::Module::Install;
 name 'App-FakeTwitter';
-all_from 'lib/App/FakeTwitter.pm';
+all_from 'lib/App/FakeTwitter/Util.pm';
 
 # requires '';
 
