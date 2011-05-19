@@ -148,7 +148,7 @@ function expand_url(id) {
                         info = 'Error'; break;
                 }
                 $('div#' + id + ' > div.tweetholder').append(
-                    $('<div>').append( info, ' - ', $('<a>').attr({href: data.url, target: '_blank'}).append(data.url) ).addClass('expanded_url'));
+                    $('<div>').append( info, $('<br>'), $('<a>').attr({href: data.url, target: '_blank'}).append(data.url) ).addClass('expanded_url'));
             }
         });
     });
