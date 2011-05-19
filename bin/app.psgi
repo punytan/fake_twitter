@@ -283,6 +283,7 @@ use HTML::Entities::Recursive;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use App::FakeTwitter::Util;
+local $| = 1;
 
 my $oauth_token = do "$Bin/../config/oauth.pl" or die $!;
 my $tpath = "$Bin/../templates";
