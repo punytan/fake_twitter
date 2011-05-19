@@ -331,6 +331,7 @@ my $w; $w = AE::timer 1, 10, sub {
         %$oauth_token,
         method     => 'userstream',
         on_error   => sub { $STREAM_CONN = 0; },
+        on_eof     => sub { $STREAM_CONN = 0; },
         on_connect => sub { $STREAM_CONN = 1; },
         on_tweet   => sub {
             my $tweet = $recursive->decode(shift);
