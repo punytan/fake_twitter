@@ -286,6 +286,7 @@ use App::FakeTwitter::Util;
 local $| = 1;
 
 my $oauth_token = do "$Bin/../config/oauth.pl" or die $!;
+my $domain = do "$Bin/../config/domain.pl" or die $!;
 my $tpath = "$Bin/../templates";
 my $spath = "$Bin/../static";
 
@@ -309,7 +310,10 @@ $mobile->static_path($spath);
 my $mapp = builder {
     enable 'Session',
         store => Plack::Session::Store::File->new( dir => "$Bin/../sessions" ),
-        state => Plack::Session::State::Cookie->new( session_key => 'uid' );
+        state => Plack::Session::State::Cookie->new(
+            session_key => 'uid',
+            domain      => $domain,
+        );
     mount '/mobile' => $mobile;
     mount '/'       => $app;
 };

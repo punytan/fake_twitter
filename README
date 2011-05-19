@@ -3,6 +3,7 @@ Create following files. See also config_sample/
 config/
 |-- filter.pl
 |-- oauth.pl
+|-- domain.pl
 `-- phrase.pl
 
 Then,
