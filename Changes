@@ -1,5 +1,9 @@
 Revision history for Perl extension App::FakeTwitter
 
+0.04    Sat May 21 23:22:35 2011
+        - bug fix (auto reconnect)
+        - clean up
+
 0.03    Sat Apr 30 05:17:51 2011
         - work without crawler
 
