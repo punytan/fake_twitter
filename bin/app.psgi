@@ -75,11 +75,7 @@ use parent 'Tatsumaki::Handler';
 __PACKAGE__->asynchronous(1);
 use AnyEvent::Twitter;
 use HTML::Entities::Recursive;
-
 my $OAuth = do "$Bin/../config/oauth.pl" or die $!;
-
-my $ua = AnyEvent::Twitter->new(%$OAuth);
-my $recursive = HTML::Entities::Recursive->new;
 
 sub get {
     my ($self, $api) = @_;
@@ -102,6 +98,7 @@ sub post {
 sub do {
     my ($self, $api, $method) = @_;
     my $req_opts = $self->request->parameters->as_hashref;
+    my $ua = AnyEvent::Twitter->new(%$OAuth);
 
     my %opts;
     for my $key (keys %$req_opts) {
@@ -121,6 +118,7 @@ sub do {
 sub on_response {
     my $self = shift;
     my ($hdr, $res, $reason) = @_;
+    my $recursive = HTML::Entities::Recursive->new;
 
     if ($res) {
         $res = $recursive->decode($res);
@@ -245,7 +243,7 @@ sub get {
     my $self = shift;
 
     unless ($self->request->session->{verified}) {
-        $self->render('login.html', {});
+        $self->render('login.html');
     }
 
     my $filter = $self->request->param('filter');
@@ -263,15 +261,16 @@ sub get {
         $unread->{$name} = scalar @{$main::Tweets->{$name}};
     }
 
-    my $body = $xslate->render('mobile_root.html',
-        {unread => $unread, list => \@v});
+    my $body = $xslate->render('mobile_root.html', {
+        unread => $unread,
+        list   => \@v
+    });
 
     $self->response->content_type('text/html');
     $self->finish(Encode::encode_utf8($body));
 }
 
 package main;
-
 use Plack::Builder;
 use Plack::Middleware::Session;
 use Plack::Session::Store::File;
@@ -280,42 +279,37 @@ use Tatsumaki::Application;
 use Twiggy::Server;
 use AnyEvent::Twitter::Stream;
 use HTML::Entities::Recursive;
-use FindBin;
 use lib "$FindBin::Bin/../lib";
 use App::FakeTwitter::Util;
 local $| = 1;
 
 my $oauth_token = do "$Bin/../config/oauth.pl" or die $!;
 my $domain = do "$Bin/../config/domain.pl" or die $!;
-my $tpath = "$Bin/../templates";
-my $spath = "$Bin/../static";
+my $tpath  = "$Bin/../templates";
+my $spath  = "$Bin/../static";
 
 my $app = Tatsumaki::Application->new([
     '/twitter/([a-zA-z0-9_/]+)' => 'Twitter',
-    '/api/tweet/show/(.+)' => 'API::Tweet::Show',
-    '/api/filter/unread' => 'API::Filter::Unread',
+    '/api/tweet/show/(.+)'      => 'API::Tweet::Show',
+    '/api/filter/unread'        => 'API::Filter::Unread',
     '/api/filter' => 'API::Filter',
-    '/settings' => 'Settings',
-    '/logout' => 'Logout',
-    '/login' => 'Login',
-    '/' => 'Root',
+    '/settings'   => 'Settings',
+    '/logout'     => 'Logout',
+    '/login'      => 'Login',
+    '/mobile'     => 'Mobile::Root',
+    '/'           => 'Root',
 ]);
 $app->template_path($tpath);
 $app->static_path($spath);
-
-my $mobile = Tatsumaki::Application->new([ '' => 'Mobile::Root' ]);
-$mobile->template_path($tpath);
-$mobile->static_path($spath);
 
 my $mapp = builder {
     enable 'Session',
         store => Plack::Session::Store::File->new( dir => "$Bin/../sessions" ),
         state => Plack::Session::State::Cookie->new(
-            session_key => 'uid',
             domain      => $domain,
+            session_key => 'uid',
         );
-    mount '/mobile' => $mobile;
-    mount '/'       => $app;
+    mount '/' => $app;
 };
 
 my $server; $server = Twiggy::Server->new(
@@ -327,9 +321,6 @@ my ($STREAM_CONN, $listener);
 my $w; $w = AE::timer 1, 10, sub {
     return if $STREAM_CONN;
 
-    my $recursive = HTML::Entities::Recursive->new;
-    my $util = App::FakeTwitter::Util->new;
-
     say "ALERT: wake up";
     $listener = AnyEvent::Twitter::Stream->new(
         %$oauth_token,
@@ -338,7 +329,9 @@ my $w; $w = AE::timer 1, 10, sub {
         on_eof     => sub { $STREAM_CONN = 0; },
         on_connect => sub { $STREAM_CONN = 1; },
         on_tweet   => sub {
+            my $recursive = HTML::Entities::Recursive->new;
             my $tweet = $recursive->decode(shift);
+            my $util  = App::FakeTwitter::Util->new;
 
             return if not $tweet->{text}
                    or not $util->is_valid_tweet($tweet);
