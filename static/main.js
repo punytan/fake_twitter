@@ -3,239 +3,265 @@ var is_loading = false;
 
 function load(v) {
     var filter = v ? v : 'timeline';
-    if ( !is_loading ) {
-        is_loading = true;
-        $.ajax({
-            url: "/api/tweet/show/" + filter,
-            data: {},
-            type: 'get',
-            dataType: 'json',
-            success: function (r) {
-                $('div#timeline').append(
-                    $('<div>').append(filter).addClass('fn'));
 
-                var twbase = 'http://twitter.com/';
-                //console.log(r);
-                for (var i in r) {
-                    var id = r[i].id;
-
-                    $("div#timeline").append( $('<div>').attr({id:id}) );
-
-                    if (r[i].retweeted_status != undefined) $("div#" + id).css("background-color", "#ffc");
-                    if (/pun[y|i]tan/.test(r[i]["processed"])) $("div#" + id).css("background-color", "pink");
-
-                    $("div#" + id).append(
-                        $('<div>').append(
-                            $('<img>').attr({src: r[i].user.profile_image_url}).addClass('icon'),
-                            $('<div>').append("(", r[i].user.friends_count, "/", r[i].user.followers_count, ")")
-                        ).addClass('iconarea')
-                    );
-
-                    $("div#" + id).append(
-                        $('<div>').append(
-                            $('<span>').append(
-                                $('<a>').append(r[i].user.screen_name).attr(
-                                    {href: twbase + r[i].user.screen_name, 'target': '_blank'})),
-                            $('<span>').append(r[i].processed)
-                        ).addClass('tweetholder')
-                    );
-
-                    $("div#" + id).append( $('<div>').addClass('via') );
-
-                    $("div#" + id + " > div.via").append(
-                        $('<span>').append('RT').addClass('rt'),                      $('<span>').append(' / '),
-                        $('<span>').append('Unofficial RT').addClass('unofficialrt'), $('<span>').append(' / '),
-                        $('<span>').append('Reply').addClass('reply'),                $('<span>').append(' / '),
-                        $('<span>').append('Fav').addClass('fav'),                    $('<span>').append(' / '),
-
-                        $('<a>').append(r[i].created_at).attr(
-                            {href: twbase + r[i].user.screen_name + "/status/" + r[i].id, 'target': '_blank'}),
-                        $('<span>').append(' / '),
-
-                        $('<span>').append(r[i].source)
-                    );
-
-                    $("div#" + id).append( $('<div>').addClass('clear') );
-
-                    if (r[i].in_reply_to_status_id) {
-                        var target = r[i].in_reply_to_status_id + Math.floor(Math.random() * 10000);
-                        $("div#timeline").append(
-                            $('<div>').addClass('in_reply_to_status_id').attr(
-                                {id:target}).addClass(target));
-                        load_reply(r[i].in_reply_to_status_id, target);
-                    }
-
-                    expand_url(id);
-                }
-
-                if (r.length == 0) $("div#timeline").append($('<div>').append("no item"));
-                is_loading = false;
-            },
-            error: function () { is_loading = false; }
-        });
+    if (is_loading) {
+        load_unread();
+        return;
     }
+
+    var onsuccess = function (res) {
+        if (res.length == 0)
+            return;
+
+        $('div#timeline').append(
+            $('<div>').append(filter).addClass('fn'));
+
+        for (var i in res) {
+            var item = res[i];
+            var id = 'div#' + item.id;
+            var twbase = 'http://twitter.com/';
+
+            $("div#timeline").append(
+                $('<div>').attr({ id : item.id }));
+
+            if (item.retweeted_status != undefined)
+                $(id).css("background-color", "#ffc");
+
+            if (/pun[y|i]tan/.test(item.processed))
+                $(id).css("background-color", "pink");
+
+            $(id).append(
+                $('<div>').append(
+                    $('<img>').attr({ src : item.user.profile_image_url }).addClass('icon'),
+                    $('<div>').append( "(", item.user.friends_count, "/", item.user.followers_count, ")")
+                ).addClass('iconarea')
+            );
+
+            $(id).append(
+                $('<div>').append(
+                    $('<span>').append(
+                        $('<a>').append(item.user.screen_name).attr({
+                            href   : twbase + item.user.screen_name,
+                            target : '_blank'
+                        })
+                    ),
+                    $('<span>').append(item.processed)
+                ).addClass('tweetholder')
+            );
+
+            $(id).append(
+                $('<div>').addClass('via'));
+
+            $(id + " > div.via").append(
+                $('<span>').append('RT').addClass('rt'),
+                $('<span>').append(' / '), $('<span>').append('Unofficial RT').addClass('unofficialrt'),
+                $('<span>').append(' / '), $('<span>').append('Reply')        .addClass('reply'),
+                $('<span>').append(' / '), $('<span>').append('Fav')          .addClass('fav'),
+                $('<span>').append(' / '), $('<a>').append(item.created_at).attr({
+                    href   : twbase + item.user.screen_name + "/status/" + item.id,
+                    target : '_blank'
+                }),
+                $('<span>').append(' / '), $('<span>').append(item.source)
+            );
+
+            $(id).append(
+                $('<div>').addClass('clear'));
+
+            if (item.in_reply_to_status_id) {
+                var target = item.in_reply_to_status_id + Math.floor(Math.random() * 10000);
+                $("div#timeline").append(
+                    $('<div>').addClass('in_reply_to_status_id').attr({
+                        id : target
+                    }).addClass(target));
+
+                load_reply(item.in_reply_to_status_id, target);
+            }
+
+            expand_url(item.id);
+        }
+    };
+
+    is_loading = true;
+    $.get("/api/tweet/show/" + filter, function (res) {
+        is_loading = false;
+        onsuccess(res)
+    }, 'json').error(function () {
+        is_loading = false;
+    });
+
     load_unread();
 }
 
 function load_unread() {
-    $.ajax({
-        url: '/api/filter/unread',
-        data : {},
-        type: 'get',
-        dataType: 'json',
-        success: function (r) {
-            $('div#tabs > div').remove();
-            for (var i in r) {
-                if (r[i] > 0) {
-                    $('div#tabs').append(
-                        $('<div>').append(i, " (", r[i], ") ").attr({id: "_" + i}));
-                }
-            }
+    $.get('/api/filter/unread', function (res) {
+        $('div#tabs > div').remove();
+        for (var i in res) {
+            if (res[i] > 0)
+                $('div#tabs').append($('<div>').append(i, " (", res[i], ") ").attr({id: "_" + i}));
         }
-    });
+    }, 'json');
 }
 
 function statuses_update(status, in_reply_to_status_id) {
-    var parameters = { status : status };
-    if (in_reply_to_status_id) parameters["in_reply_to_status_id"] = in_reply_to_status_id;
+    var parameters = {
+        status : status
+    };
 
-    $.ajax({
-        url: '/twitter/statuses/update',
-        data : parameters,
-        type: 'post',
-        dataType: 'json',
-        success: function (r) {
-            //console.log(r);
-        }
-    });
+    if (in_reply_to_status_id)
+        parameters["in_reply_to_status_id"] = in_reply_to_status_id;
+
+    $.post('/twitter/statuses/update', parameters, function (res) {
+        // noop
+    }, 'json');
 }
 
 function load_reply(id, target) {
     $('div#' + target).append(function () {
-        $.ajax({
-            url: "/twitter/statuses/show/" + id,
-            data: { },
-            type: 'get',
-            dataType: 'json',
-            success: function(r) {
-                //console.log($('div#' + id).val() );
-                if ($('div#' + target).val() != '') return;
-                $('div#' + target).append(
-                    $('<div>').append(
-                        $('<img>').attr({src: r[1].user.profile_image_url}).addClass('icon')).addClass('iconarea'),
-                    $('<div>').append(
-                        $('<span>').append(r[1].text)).addClass('tweetholder'),
-                    $('<div>').addClass('clear')
-                );
-            }
-        });
+        $.get("/twitter/statuses/show/" + id, function(res) {
+            if ($('div#' + target).val() != '')
+                return;
+
+            $('div#' + target).append(
+                $('<div>').append(
+                    $('<img>').attr({
+                        src : res[1].user.profile_image_url
+                    }).addClass('icon')
+                ).addClass('iconarea'),
+
+                $('<div>').append(
+                    $('<span>').append(res[1].text)).addClass('tweetholder'),
+
+                $('<div>').addClass('clear')
+            );
+        }, 'json');
     });
 }
 
 function expand_url(id) {
     $('div#' + id + ' > div.tweetholder > span:nth-child(2) > a').append(function () {
-        if ( /twitter\.com\/|tvtwi\.com|buzztter.com\/|frepan\.org|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\/|nhk\.jp\/|bit\.ly\/17n4iz/.test(this) ) return;
-        $.ajax({
-            url: 'http://api.linknode.net/urlresolver?url=' + this,
-            success: function (data) {
-                var info;
-                switch (data.status) {
-                    case 'not_html' :
-                        info = data.content_type; break;
-                    case 'ok' :
-                        info = data.title; break;
-                    default :
-                        info = 'Error'; break;
-                }
-                $('div#' + id + ' > div.tweetholder').append(
-                    $('<div>').append( info, $('<br>'), $('<a>').attr({href: data.url, target: '_blank'}).append(data.url) ).addClass('expanded_url'));
+        if ( /twitter\.com\/|buzztter.com\/|frepan\.org|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\/|nhk\.jp\//.test(this) )
+            return;
+
+        $.get('http://api.linknode.net/urlresolver?url=' + this, function (data) {
+            var info;
+            switch (data.status) {
+                case 'not_html' :
+                    info = data.content_type; break;
+                case 'ok' :
+                    info = data.title; break;
+                default :
+                    info = 'Error'; break;
             }
+
+            $('div#' + id + ' > div.tweetholder').append(
+                $('<div>').append( info, $('<br>'),
+                    $('<a>').attr({ href : data.url, target : '_blank' }).append(data.url)
+                ).addClass('expanded_url')
+            );
         });
     });
 }
 
+/*
+ * initializer goes here
+ *
+ */
+
+// initial loading
+$(function () {
+    load();
+});
+
+// key bindings
+$(function () {
+    $(document).keydown(function (event) {
+        if (event.which == 65) {        /* a */
+            $('#can_load_next').click();
+        } else if (event.which == 78) {  /* n */
+            $('#next').click();
+        } else if (event.which == 84) { /* t */
+            $('textarea').focus();
+        }
+    });
+
+    $('textarea, input').bind('keydown', function(event) {
+        event.stopPropagation();
+    });
+});
+
+// init plugins
+$(function () {
+    $("textarea").charCount();
+
+    $('#can_load_next').iphoneSwitch("on",
+        function() {
+            can_load_next = true;
+        }, function() {
+            can_load_next = false;
+        }, {
+            switch_path :
+                '/static/iphone_switch.png',
+            switch_on_container_path :
+                '/static/iphone_switch_container_on.png',
+            switch_off_container_path :
+                '/static/iphone_switch_container_off.png'
+        }
+    );
+})
+
+/*
+ * specific event binding goes here
+ *
+ */
+
+// bind mouse event
 $(window).scroll(function () {
-    var d = $("div#timeline > div:last").offset().top
+    var d = $("div#next").offset().top
             - $(window).scrollTop()
             - $(window).height();
 
     if (d < 5 && can_load_next == true) {
         load_unread();
         var v = $('div#tabs div:first-child').attr('id');
-        if (v != undefined) load(v.substr(1));
+        if (v != undefined)
+            load(v.substr(1));
     }
 });
 
+// bind click event - retweet
 $(function () {
-    load();
-
-    $("textarea").charCount();
-
-    $('#can_load_next').iphoneSwitch("on",
-        function() { can_load_next = true;  },
-        function() { can_load_next = false; },
-        {
-            switch_path:               '/static/iphone_switch.png',
-            switch_on_container_path:  '/static/iphone_switch_container_on.png',
-            switch_off_container_path: '/static/iphone_switch_container_off.png'
-        }
-    );
-
-    $('div#next').click(function () {
-        var v = $('div#tabs div:first-child').attr('id');
-        if (v != undefined) load(v.substr(1));
-        load_unread();
-    });
-
-    $('span.fav').live('click', function () {
-        var id = this.parentNode.parentNode.id;
-        lbdialog({
-            content: 'Fav it?',
-            cancelButton: {
-                text: 'No'
-            },
-            OKButton: {
-                text: 'Yes',
-                callback: function () {
-                    lbdialog({content: 'done', autoDisappear: 3});
-                    $.ajax({
-                        url: "/twitter/favorites/create/" + id,
-                        data: { },
-                        type: 'post',
-                        dataType: 'json',
-                        success: function(r) {
-                            //console.log(r);
-                        }
-                    });
-                }
-            }
-        });
-    });
-
     $('span.rt').live('click', function () {
         var id = this.parentNode.parentNode.id;
         lbdialog({
-            content: 'Retweet it?',
-            cancelButton: {
-                text: 'No'
-            },
-            OKButton: {
-                text: 'Yes',
-                callback: function () {
-                    $.ajax({
-                        url: "/twitter/statuses/retweet/" + id,
-                        data: { },
-                        type: 'post',
-                        dataType: 'json',
-                        success: function(r) {
-                            //console.log(r);
-                        }
-                    });
+            content      : 'Retweet it?',
+            cancelButton : { text : 'No' },
+            OKButton     : {
+                text     : 'Yes',
+                callback : function () {
+                    $.post("/twitter/statuses/retweet/" + id, function(res) {
+                        // TODO : check the result value
+                    }, 'json');
                 }
             }
         });
     });
+});
 
+// bind click event - unofficial retweet
+$(function () {
+    $('span.unofficialrt').live('click', function () {
+        var id = this.parentNode.parentNode.id;
+        var screen_name = $('div#' + id + ' > .tweetholder > span:first').text();
+        var text        = $('div#' + id + ' > .tweetholder > span:last').text();
+        var new_text    = ' RT @' + screen_name + ': ' + text;
+
+        $('textarea').val(new_text);
+        $('textarea').focus();
+    });
+});
+
+// bind click event - reply
+$(function () {
     $('span.reply').live('click', function () {
         var id = this.parentNode.parentNode.id;
         var screen_name = $('div#' + id + ' > .tweetholder > span:first').text();
@@ -245,74 +271,72 @@ $(function () {
         $('form#statuses_update').removeClass().addClass(id);
         $('textarea').val(new_text); $('textarea').focus();
     });
+});
 
-    $('span.unofficialrt').live('click', function () {
+// bind click event - fav
+$(function () {
+    $('span.fav').live('click', function () {
         var id = this.parentNode.parentNode.id;
-        var screen_name = $('div#' + id + ' > .tweetholder > span:first').text();
-        var text        = $('div#' + id + ' > .tweetholder > span:last').text();
-        var new_text    = ' RT @' + screen_name + ': ' + text;
-
-        $('textarea').val(new_text); $('textarea').focus();
-    });
-
-    $('#statuses_update').submit(function () {
         lbdialog({
-            content: 'Do you want to update status?',
-            cancelButton: {
-                text: 'No'
-            },
-            OKButton: {
-                text: 'Yes',
-                callback: function () {
-                    var status = $('#statuses_update textarea[name="status"]').val();
-                    var in_reply_to_status_id = $('form#statuses_update').attr('class');
-                    statuses_update( status, in_reply_to_status_id ? in_reply_to_status_id : undefined );
-                    $('#statuses_update textarea[name="status"]').val('');
-                    $('form#statuses_update').removeClass();
+            content      : 'Fav it?',
+            cancelButton : { text : 'No' },
+            OKButton     : {
+                text     : 'Yes',
+                callback : function () {
+                    lbdialog({ content : 'Done', autoDisappear : 3 });
+                    $.post("/twitter/favorites/create/" + id, function(res) {
+                        // TODO : check the result value
+                    }, 'json');
                 }
             }
         });
     });
+})
 
+// bind submit event - statuses update
+$(function () {
+    var execute_statuses_update = function () {
+        var status = $('#statuses_update textarea[name="status"]').val();
+        var in_reply_to_status_id = $('form#statuses_update').attr('class');
+
+        statuses_update(status, in_reply_to_status_id ? in_reply_to_status_id : undefined);
+
+        $('#statuses_update textarea[name="status"]').val('');
+        $('form#statuses_update').removeClass();
+    };
+
+    $('#statuses_update').submit(function () {
+        lbdialog({
+            content      : 'Do you want to update status?',
+            cancelButton : { text : 'No' },
+            OKButton     : {
+                text     : 'Yes',
+                callback : execute_statuses_update
+            }
+        });
+    });
+});
+
+// bind submit event - create new filter
+$(function () {
     $("#new_filter").submit(function () {
         var screen_name = $('#new_filter_box input[name="screen_name"]');
         var filter      = $('#new_filter_box input[name="filter"]');
 
-        $.ajax({
-            url: "/api/filter",
-            data: {
-                screen_name : screen_name.val(),
-                filter : filter.val()
-            },
-            type: 'post',
-            dataType: 'json',
-            success: function(r) {
-                if (r.success == 1) {
-                    screen_name.val('');
-                    filter.val('');
-                    $('div#new_filter_box').append(
-                        $('<div>').append('OK').fadeIn('slow').fadeOut('slow') );
-                } else {
-                    $('div#new_filter_box').append(
-                        $('<div>').append('ERROR').fadeIn('slow').fadeOut('slow') );
-                }
+        $.post("/api/filter", {
+            screen_name : screen_name.val(),
+            filter : filter.val()
+        }, function(res) {
+            if (res.success == 1) {
+                screen_name.val('');
+                filter.val('');
+                $('div#new_filter_box').append(
+                    $('<div>').append('OK').fadeIn('slow').fadeOut('slow') );
+            } else {
+                $('div#new_filter_box').append(
+                    $('<div>').append('ERROR').fadeIn('slow').fadeOut('slow') );
             }
-        });
+        }, 'json');
     });
-
-    $(document).keydown(function (event) {
-        if (event.which == 65) {        /* a */
-            $('#can_load_next').click();
-        } else if (event.which == 78) {  /* n */
-            $('#next').click();
-        } else if (event.which == 84) { /* t */
-            $('textarea').focus();
-        } else {
-        }
-    });
-
-    $('textarea').bind('keydown', function(e) { e.stopPropagation(); });
-    $('input').bind('keydown',    function(e) { e.stopPropagation(); });
-
 });
 
