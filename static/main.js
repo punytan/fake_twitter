@@ -297,9 +297,9 @@ $(function () {
 $(function () {
     var execute_statuses_update = function () {
         var status = $('#statuses_update textarea[name="status"]').val();
-        var in_reply_to_status_id = $('form#statuses_update').attr('class');
+        var in_reply_to_status_id = $('form#statuses_update').attr('class') || undefined;
 
-        statuses_update(status, in_reply_to_status_id ? in_reply_to_status_id : undefined);
+        statuses_update(status, in_reply_to_status_id);
 
         $('#statuses_update textarea[name="status"]').val('');
         $('form#statuses_update').removeClass();
