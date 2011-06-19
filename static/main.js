@@ -139,7 +139,7 @@ function load_reply(id, target) {
 
 function expand_url(id) {
     $('div#' + id + ' > div.tweetholder > span:nth-child(2) > a').append(function () {
-        if ( /twitter\.com\/|buzztter.com\/|frepan\.org|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\/|nhk\.jp\//.test(this) )
+        if ( /twitter\.com\/|buzztter.com\/|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\/|nhk\.jp\/|tvtwi\.com\/|metacpan\.org\//.test(this) )
             return;
 
         $.get('http://api.linknode.net/urlresolver?url=' + this, function (data) {
