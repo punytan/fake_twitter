@@ -1,6 +1,6 @@
 FT = {};
 
-(function () {
+(function ($, FT) {
 
 FT.status = {
     isLoading   : false,
@@ -175,5 +175,5 @@ FT.statusesUpdate = function (status, in_reply_to_status_id) {
     }, 'json');
 };
 
-})();
+})(jQuery, FT);
 
