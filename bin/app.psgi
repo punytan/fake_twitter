@@ -277,6 +277,7 @@ use Plack::Session::Store::File;
 use Plack::Session::State::Cookie;
 use Tatsumaki::Application;
 use Twiggy::Server;
+use AnyEvent::HTTP;
 use AnyEvent::Twitter::Stream;
 use HTML::Entities::Recursive;
 use lib "$FindBin::Bin/../lib";
@@ -318,16 +319,17 @@ my $server; $server = Twiggy::Server->new(
 )->register_service($mapp);
 
 my ($STREAM_CONN, $listener);
-my $w; $w = AE::timer 1, 10, sub {
+my $w; $w = AE::timer 1, 60, sub {
     return if $STREAM_CONN;
 
+    use Data::Dumper;
     say "ALERT: wake up";
     $listener = AnyEvent::Twitter::Stream->new(
         %$oauth_token,
         method     => 'userstream',
-        on_error   => sub { $STREAM_CONN = 0; },
-        on_eof     => sub { $STREAM_CONN = 0; },
-        on_connect => sub { $STREAM_CONN = 1; },
+        on_error   => sub { $STREAM_CONN = 0; print Dumper \@_; },
+        on_eof     => sub { $STREAM_CONN = 0; print Dumper \@_},
+        on_connect => sub { $STREAM_CONN = 1; print Dumper \@_},
         on_tweet   => sub {
             my $recursive = HTML::Entities::Recursive->new;
             my $tweet = $recursive->decode(shift);
@@ -335,6 +337,12 @@ my $w; $w = AE::timer 1, 10, sub {
 
             return if not $tweet->{text}
                    or not $util->is_valid_tweet($tweet);
+
+            for my $url (split m{(http://\S+)}, $tweet->{text}) {
+                http_get "http://api.linknode.net/urlresolver", url => $url, sub {
+                    # noop
+                };
+            }
 
             if ($tweet->{source} =~ />(.+)</) {
                 $tweet->{source} = $1;
