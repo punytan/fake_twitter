@@ -131,13 +131,12 @@ FT.load = function (f) {
                         id : target
                     }).addClass(target));
 
-                var targetDiv = $('div#' + target);
-                $(targetDiv).append(function () {
+                $('div#' + target).append(function () {
                     $.getJSON("/twitter/statuses/show/" + id).success(function(res) {
-                        if ($(targetDiv).val() != '')
+                        if ($('div#' + target).val() != '')
                             return;
 
-                        $(targetDiv).append(
+                        $('div#' + target).append(
                             $('<div>').append(
                                 $('<img>').attr({
                                     src : res[1].user.profile_image_url
