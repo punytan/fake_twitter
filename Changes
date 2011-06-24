@@ -1,5 +1,9 @@
 Revision history for Perl extension App::FakeTwitter
 
+0.06    Sat Jun 25 02:17:22 2011
+        - better JavaScript code
+        - many cleanup
+
 0.05    Mon May 30 06:04:27 2011
         - JavaScript cleanup
         - Upgrade jquery to 1.6.1
