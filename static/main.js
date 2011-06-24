@@ -53,11 +53,11 @@ $(function () {
 // bind mouse event
 $(window).scroll(function () {
     var d = $("div#next").offset().top
-            - $(window).scrollTop()
-            - $(window).height();
+        - $(window).scrollTop()
+        - $(window).height();
 
+    FT.loadUnread();
     if (d < 5 && FT.status.canLoadNext === true) {
-        FT.loadUnread();
         var v = $('div#tabs div:first-child').attr('id');
         if (v !== undefined)
             FT.load(v.substr(1));
