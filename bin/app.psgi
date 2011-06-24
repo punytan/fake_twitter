@@ -34,7 +34,7 @@ sub get {
         $self->response->redirect('/');
         $self->finish;
     } else {
-        $self->render('login.html', {});
+        $self->render('login.html');
     }
 }
 
@@ -52,7 +52,7 @@ sub post {
         }
         $self->finish;
     } else {
-        $self->render('login.html', {});
+        $self->render('login.html');
     }
 }
 
