@@ -9,10 +9,12 @@ FT.status = {
 
 FT.expandURL = function (id) {
     $('div#' + id + ' > div.tweetholder > span:nth-child(2) > a').append(function () {
-        if ( /twitter\.com\/|buzztter.com\/|nico\.ms\/lv|s\.nikkei\.com\/|tcrn.ch\/|nhk\.jp\/|tvtwi\.com\/|metacpan\.org\//.test(this) )
+        if ( /twitter\.com\/|nico\.ms\/lv|tvtwi\.com\/|metacpan\.org\//.test(this) )
             return;
 
-        $.get('http://api.linknode.net/urlresolver?url=' + encodeURIComponent(this), function (data) {
+        $.getJSON(
+            'http://api.linknode.net/urlresolver?url=' + encodeURIComponent(this)
+        ).success(function (data) {
             var info;
             switch (data.status) {
                 case 'not_html' :
@@ -41,7 +43,9 @@ FT.expandURL = function (id) {
 };
 
 FT.loadUnread = function (res) {
-    $.getJSON('/api/filter/unread').success(function (res) {
+    $.getJSON(
+        '/api/filter/unread'
+    ).success(function (res) {
         $('div#tabs > div').remove();
         for (var i in res) {
             if (res[i] > 0) {
@@ -124,33 +128,39 @@ FT.load = function (f) {
 
             if (item.in_reply_to_status_id) {
                 var id = item.in_reply_to_status_id;
-                var target = id + Math.floor(Math.random() * 10000);
+                var target = id + Math.random().toString().substring(3, 10);
+
+                var load_reply = function (id, target) {
+                    $('div#' + target).append(function () {
+                        $.getJSON(
+                            "/twitter/statuses/show/" + id
+                        ).success(function (res) {
+                            if ($('div#' + target).val() != '')
+                                return;
+
+                            $('div#' + target).append(
+                                $('<div>').append(
+                                    $('<img>').attr({
+                                        src : res[1].user.profile_image_url
+                                    }).addClass('icon')
+                                ).addClass('iconarea'),
+
+                                $('<div>').append(
+                                    $('<span>').append(res[1].text)
+                                ).addClass('tweetholder'),
+
+                                $('<div>').addClass('clear')
+                            );
+                        });
+                    });
+                };
 
                 $("div#timeline").append(
                     $('<div>').addClass('in_reply_to_status_id').attr({
                         id : target
-                    }).addClass(target));
+                    }));
 
-                $('div#' + target).append(function () {
-                    $.getJSON("/twitter/statuses/show/" + id).success(function(res) {
-                        if ($('div#' + target).val() != '')
-                            return;
-
-                        $('div#' + target).append(
-                            $('<div>').append(
-                                $('<img>').attr({
-                                    src : res[1].user.profile_image_url
-                                }).addClass('icon')
-                            ).addClass('iconarea'),
-
-                            $('<div>').append(
-                                $('<span>').append(res[1].text)
-                            ).addClass('tweetholder'),
-
-                            $('<div>').addClass('clear')
-                        );
-                    });
-                });
+                load_reply(item.in_reply_to_status_id, target);
             }
 
             FT.expandURL(item.id);
@@ -158,7 +168,6 @@ FT.load = function (f) {
 
     }).error(function () {
         FT.status.isLoading = false;
-        return;
     });
 };
 
