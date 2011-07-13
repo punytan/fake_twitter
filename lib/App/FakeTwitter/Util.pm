@@ -8,7 +8,7 @@ use HTML::Entities;
 our %re = (
     url   => qr{(s?https?:\/\/[-_.!~*'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)},
     reply => qr{(\@[0-9A-Za-z_]+)},
-    hash  => qr{(\#[0-9A-Za-z_]+)},
+    hash  => qr{(\#\S+)},
     com   => qr{\[(co\d+)\]},
 );
 
@@ -97,7 +97,7 @@ sub process {
                 $html .= sprintf $basic{url}, $safe_token, $safe_token;
             }
 
-        } elsif ($token =~ m!^\#([A-Za-z0-9_]+)$!) {
+        } elsif ($token =~ m!^\#(\S+)$!) {
             my $hash_ent = encode_entities($1);
             $html .= sprintf $basic{hash}, $hash_ent, $safe_token;
 
