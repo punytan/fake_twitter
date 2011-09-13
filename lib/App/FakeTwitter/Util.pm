@@ -119,14 +119,26 @@ sub process {
 sub is_valid_tweet {
     my ($self, $tweet) = @_;
 
+    $tweet = $self->expand_url($tweet);
+
     use utf8;
-    return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit|Hatena)/i
+    return if $tweet->{source} =~ /(?:loctouch|foursquare|twittbot\.net|WiTwit|odiva)/i
            or $tweet->{text} =~ /(?:shindanmaker\.com|Livlis)/i
            or $tweet->{text} =~ /(?:[RＲ][TＴ]|拡散)(?:希望|お?願い|して|よろしく)|\@ikedanob/i
            or $tweet->{text} =~ /[公式]?(?:リ?ツイート|[Q|R]T)された回?数.+(?:する|します)/i
            or $tweet->{text} =~ /(?:[RQ]T:? \@\w+.*){3,}/i;
 
     return 1;
+}
+
+sub expand_url {
+    my ($self, $tweet) = @_;
+
+    for my $url (@{ $tweet->{entities}{urls} || [] }) {
+        $tweet->{text} =~ s/$url->{url}/$url->{expanded_url}/;
+    }
+
+    return $tweet;
 }
 
 1;
