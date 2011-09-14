@@ -135,7 +135,9 @@ sub expand_url {
     my ($self, $tweet) = @_;
 
     for my $url (@{ $tweet->{entities}{urls} || [] }) {
-        $tweet->{text} =~ s/$url->{url}/$url->{expanded_url}/;
+        if (defined $url->{expanded_url}) {
+            $tweet->{text} =~ s/$url->{url}/$url->{expanded_url}/;
+        }
     }
 
     return $tweet;
