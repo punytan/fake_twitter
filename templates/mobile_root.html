@@ -4,66 +4,89 @@
     <meta charset="UTF-8" />
     <title>MobileRoot</title>
     <meta name="viewport" content="initial-scale = 1.0,maximum-scale = 1.0" />
-    <link rel="stylesheet" type="text/css" href="/static/base.css" />
     <style>
         * {
             -webkit-text-size-adjust : none;
+            font-family:"Helvetica Neue", Arial, Helvetica, sans-serif;
+            margin : 0px;
+            padding : 0px;
         }
-        img {
-            width : 150;
-            height : 150px;
+
+        ul {
+            list-style : none;
+            padding : 0;
+            margin : 0;
         }
-        .retweet {
-            background-color : #FFF8DC;
+
+        li { font-size : 0.9em; }
+
+        li.retweet { background-color : #FFF8DC; }
+
+        li.tweet {
+            padding : 10px;
+            border-bottom : 1px solid black;
         }
-        ul.unread { }
-        ul.unread > li {
-            padding-left : 5%;
-            padding-top : 3%;
-        }
-        ul.unread > li > a {
+
+        ul#unread > li {
+            border-bottom : 1px solid black;
             width : 100%;
+        }
+
+        a {
+            word-break : break-all;
+            color : #2276BB;
+            text-decoration : none;
+        }
+
+        ul#unread > li > a {
+            display : block;
+            color : black;
+            padding-top : 10px;
+            padding-bottom : 10px;
+            padding-left : 40px;
+        }
+
+        ul#timeline {
+        }
+
+        img.thumb_mini {
+            height : 32px;
+            width  : 32px;
+            vertical-align : text-top;
         }
 
     </style>
 </head>
 <body>
+<ul id="timeline">
 : for $list -> $item {
-
     : if ($item.retweeted_status) {
-        <div class="retweet">
+        <li class="tweet retweet">
     : } else {
-        <div>
+        <li class="tweet">
     : }
             <div>
-                <img src="<: $item.user.profile_image_url :>" style="width : 32px; height : 32px;" />
+                <img src="<: $item.user.profile_image_url :>" class="thumb_mini" />
                 <span><: $item.user.screen_name :> (<: $item.user.friends_count :> / <: $item.user.followers_count :>)</span>
             </div>
 
             <div><blockquote><: $item.processed | mark_raw :></blockquote></div>
 
             <div style="text-align:right;"><: $item.created_at :></div>
-        </div>
+        </li>
 
-    <hr />
-
+: } else {
+    <li class="tweet"><div style="text-align: center;">There is no item to render.</div></li>
 : }
+</ul>
 
-: if $list.size() == 0 {
-    <div> There is no item to render.</div>
-    <hr />
-: }
-
-<div>
-<ul class="unread">
+<ul id="unread">
 : for $unread.keys() -> $key {
 :   if $unread[$key] > 0 {
-        <li><a href="/mobile?filter=<: $key :>"><: $key :></a>(<: $unread[$key] :>)</li>
+        <li><a href="/mobile?filter=<: $key :>" class="unread"><: $key :> (<: $unread[$key] :>)</a></li>
 :   }
 : }
 </ul>
-</div>
-<hr />
 
 </body>
 </html>
