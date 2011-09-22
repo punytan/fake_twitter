@@ -24,11 +24,11 @@
 
         li.tweet {
             padding : 10px;
-            border-bottom : 1px solid black;
+            border-bottom : 1px solid gray;
         }
 
         ul#unread > li {
-            border-bottom : 1px solid black;
+            border-bottom : 1px solid gray;
             width : 100%;
         }
 
@@ -40,7 +40,7 @@
 
         ul#unread > li > a {
             display : block;
-            color : black;
+            color : #14A;
             padding-top : 10px;
             padding-bottom : 10px;
             padding-left : 40px;
@@ -83,7 +83,7 @@
 <ul id="unread">
 : for $unread.keys() -> $key {
 :   if $unread[$key] > 0 {
-        <li><a href="/mobile?filter=<: $key :>" class="unread"><: $key :> (<: $unread[$key] :>)</a></li>
+    <li><a href="/mobile?filter=<: $key :>" class="unread"><span style="font-weight: bold"><: $key :></span> (<: $unread[$key] :>)</a></li>
 :   }
 : }
 </ul>
