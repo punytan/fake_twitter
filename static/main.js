@@ -186,3 +186,12 @@ $(function () {
     });
 });
 
+$(function () {
+    $("#add_ignore_word").submit(function () {
+        var word = $('#ignore_word_box input[name="word"]');
+        FT.ignoreWords.push(word.val());
+        word.val('');
+        $('div#ignore_word_box').append(
+            $('<div>').append('OK').fadeIn('slow').fadeOut('slow') );
+    });
+});

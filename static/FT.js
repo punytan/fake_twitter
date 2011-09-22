@@ -7,6 +7,8 @@ FT.status = {
     canLoadNext : true
 };
 
+FT.ignoreWords = [];
+
 FT.expandURL = function (id) {
     $('div#' + id + ' > div.tweetholder > span:nth-child(2) > a').append(function () {
         if ( /twitter\.com\/|nico\.ms\/lv|tvtwi\.com\/|metacpan\.org\//.test(this) )
@@ -164,6 +166,13 @@ FT.load = function (f) {
             }
 
             FT.expandURL(item.id);
+
+            for (var j in FT.ignoreWords) {
+                var re = new RegExp(FT.ignoreWords[j], "i");
+                var text = $('<div>').html(item.processed).text();
+                if (text.match(re))
+                    $('#' + item.id).remove();
+            }
         }
 
     }).error(function () {
