@@ -4,7 +4,8 @@ FT = {};
 
 FT.status = {
     isLoading   : false,
-    canLoadNext : true
+    canLoadNext : true,
+    isLoadingUnread : false
 };
 
 FT.ignoreWords = [];
@@ -45,6 +46,7 @@ FT.expandURL = function (id) {
 };
 
 FT.loadUnread = function (res) {
+    FT.status.isLoadingUnread = true;
     $.getJSON(
         '/api/filter/unread'
     ).success(function (res) {
@@ -60,6 +62,7 @@ FT.loadUnread = function (res) {
                 );
             }
         }
+        FT.status.isLoadingUnread = false;
     });
 };
 

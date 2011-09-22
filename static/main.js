@@ -56,7 +56,7 @@ $(window).scroll(function () {
         - $(window).scrollTop()
         - $(window).height();
 
-    FT.loadUnread();
+    if (! FT.status.isLoadingUnread) FT.loadUnread();
     if (d < 5 && FT.status.canLoadNext === true) {
         var v = $('div#tabs div:first-child').attr('id');
         if (v !== undefined)
