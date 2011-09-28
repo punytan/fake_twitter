@@ -75,7 +75,7 @@ sub process {
                 my $encoded = encode_entities($1);
                 $html .= sprintf $web{nico}, $encoded, $encoded, $safe_token;
 
-            } elsif ($token =~ m!http://(plixi\.com/p/\d+)!) {
+            } elsif ($token =~ m!http://(lockerz\.com/s/\d+)!) {
                 my $encoded = encode_entities($1);
                 $html .= sprintf $web{plixi}, $encoded, $encoded, $safe_token;
 
